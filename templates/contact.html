@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Floating Live Chat Button -->
+<div class="live-chat-btn">
+    <button type="button" class="btn btn-primary rounded-pill shadow-lg" data-bs-toggle="modal" data-bs-target="#chatModal">
+        <i class="bi bi-chat-dots-fill me-2"></i> Live Help
+    </button>
+</div>
+
+<!-- Hero Section -->
+<section class="contact-hero py-5">
+    <div class="container py-4">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">Stitch Together with Us</h1>
+                <p class="lead mb-4">Have questions about your order, patterns, or becoming a seller? We're here to help unravel any knots!</p>
+                <div class="d-flex gap-3">
+                    <a href="#contact-form" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-envelope me-2"></i> Send Message
+                    </a>
+                    <a href="#faq-section" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="bi bi-question-circle me-2"></i> Browse FAQs
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/customerservice.jpg' %}" class="img-fluid rounded-4 shadow" alt="Crochet customer service" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Map Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <h2 class="display-6 fw-bold mb-4">Visit Our Studio</h2>
+                <p class="lead mb-4">Come see where the magic happens! Our studio is open for yarn lovers and potential collaborators.</p>
+                <div class="mb-4">
+                    <h3 class="h5 mb-3"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Location</h3>
+                    <address class="ps-4">
+                        gaiwadi<br>
+                        girgaon, mumbai<br>
+                        India
+                    </address>
+                </div>
+                <div class="mb-4">
+                    <h3 class="h5 mb-3"><i class="bi bi-clock-fill text-primary me-2"></i> Hours</h3>
+                    <ul class="list-unstyled ps-4">
+                        <li class="mb-1">Monday-Friday: 9am-5pm</li>
+                        <li class="mb-1">Saturday: 10am-2pm</li>
+                        <li>Sunday: Closed</li>
+                    </ul>
+                </div>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#mapModal">
+                    <i class="bi bi-arrows-fullscreen me-2"></i> Expand Map
+                </button>
+            </div>
+            <div class="col-lg-6">
+                <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d241316.70176591733!2d72.71412916451202!3d19.082482212380583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1745924259285!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form -->
+<section class="py-5" id="contact-form">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <h2 class="h2 fw-bold mb-2">Send Us a Message</h2>
+                            <p class="text-muted">We typically respond within 24 hours</p>
+                            <div class="stitch-divider mx-auto"></div>
+                        </div>
+                        
+                        <form method="post" action="{% url 'contact' %}">
+                            {% csrf_token %}
+                            
+                            {% if messages %}
+                            <div class="mb-4">
+                                {% for message in messages %}
+                                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                                    {{ message }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="subject" class="form-label">Subject</label>
+                                    <select class="form-select" id="subject" name="subject">
+                                        <option value="General Inquiry">General Inquiry</option>
+                                        <option value="Order Help">Order Help</option>
+                                        <option value="Pattern Support">Pattern Support</option>
+                                        <option value="Wholesale Inquiry">Wholesale Inquiry</option>
+                                        <option value="Artisan Application">Artisan Application</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="message" class="form-label">Your Message</label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" checked>
+                                        <label class="form-check-label" for="newsletter">
+                                            Subscribe to our crochet newsletter
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="bi bi-send-fill me-2"></i> Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section with Dropdowns -->
+<section class="py-5 bg-light" id="faq-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Frequently Asked Questions</h2>
+            <p class="lead">Quick answers to common crochet queries</p>
+            <div class="stitch-divider mx-auto"></div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item border-0 mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                <i class="bi bi-truck text-primary me-3"></i> How do I track my order?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>Once your handmade item ships, you'll receive an email with tracking information. Most domestic orders arrive within 5-7 business days. International shipping times vary by location.</p>
+                                <p class="mb-0">Can't find your tracking email? Check your spam folder or <a href="#contact-form">contact us</a> with your order number.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item border-0 mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="bi bi-palette text-primary me-3"></i> Can I request custom colors?
+                            </button>
+                        </h3>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>Many artisans accept custom color requests! Look for the "Custom Orders Available" badge on product pages or contact the seller directly through their profile.</p>
+                                <p class="mb-0">For best results, include color swatches or Pantone numbers when making special requests.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item border-0 mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <i class="bi bi-shop text-primary me-3"></i> How do I become a seller?
+                            </button>
+                        </h3>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>We'd love to have you join our artisan community! Simply <a href="{% url 'register' %}?role=seller">register as a seller</a> and complete your artisan profile to start showcasing your crochet creations.</p>
+                                <p class="mb-0">Our team reviews all new seller applications within 2 business days to ensure quality standards.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 4 -->
+                    <div class="accordion-item border-0 mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                <i class="bi bi-arrow-left-right text-primary me-3"></i> What's your return policy?
+                            </button>
+                        </h3>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>Due to the handmade nature of our products, we offer returns within 14 days for damaged or defective items. Custom orders are final sale.</p>
+                                <p class="mb-0">To initiate a return, please <a href="#contact-form">contact us</a> with your order number and photos of the issue. We'll work with the artisan to resolve your concern.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Item 5 -->
+                    <div class="accordion-item border-0 mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                <i class="bi bi-yarn text-primary me-3"></i> What yarn types do your artisans use?
+                            </button>
+                        </h3>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                <p>Our artisans work with a variety of yarns including:</p>
+                                <ul>
+                                    <li>Premium acrylics for durability</li>
+                                    <li>Natural cotton for softness</li>
+                                    <li>Eco-friendly bamboo blends</li>
+                                    <li>Luxury wool and alpaca fibers</li>
+                                    <li>Organic and sustainable options</li>
+                                </ul>
+                                <p class="mb-0">Each product listing specifies the materials used - look for the "Materials" section on product pages.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <a href="#contact-form" class="btn btn-primary px-4">
+                        <i class="bi bi-envelope me-2"></i> Still have questions?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-geo-alt-fill me-2"></i> CroSho Studio Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d241316.70176591733!2d72.71412916451202!3d19.082482212380583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c6306644edc1%3A0x5da4ed8f8d648c69!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1745924259285!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <div class="p-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">CroSho Studio</h6>
+                            <address>
+                                gaiwadi<br>
+                        girgaon, mumbai<br>
+                        India
+                            </address>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Hours</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-1">Monday-Friday: 9am-5pm</li>
+                                <li class="mb-1">Saturday: 10am-2pm</li>
+                                <li>Sunday: Closed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-chat-dots-fill me-2"></i> Crochet Help</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-4">
+                    <div class="mb-3">
+                        <i class="bi bi-chat-square-heart-fill text-primary fs-1"></i>
+                    </div>
+                    <h4>How can we help?</h4>
+                    <p class="text-muted">Our crochet experts are available Mon-Fri 9am-5pm EST</p>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="bi bi-cart-check me-2"></i> Order Questions
+                        </button>
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="bi bi-yarn me-2"></i> Product Details
+                        </button>
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="bi bi-shop me-2"></i> Seller Support
+                        </button>
+                        <button class="btn btn-outline-primary text-start">
+                            <i class="bi bi-question-circle me-2"></i> Other Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center bg-light">
+                <p class="small text-muted mb-0"><i class="bi bi-info-circle me-2"></i> Outside hours? <a href="#contact-form">Email us</a> for a prompt reply</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .contact-hero {
+        background-color: rgba(var(--bs-primary-rgb), 0.03);
+    }
+    
+    /* Stitch Divider */
+    .stitch-divider {
+        width: 100px;
+        height: 3px;
+        background-color: var(--bs-primary);
+        position: relative;
+    }
+    .stitch-divider:before,
+    .stitch-divider:after {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border: 2px solid var(--bs-primary);
+        top: -3px;
+    }
+    .stitch-divider:before {
+        left: 25%;
+    }
+    .stitch-divider:after {
+        right: 25%;
+    }
+    
+    /* Live Chat Button */
+    .live-chat-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+    .live-chat-btn button {
+        padding: 12px 20px;
+        font-weight: 500;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Accordion Styles */
+    .accordion-button {
+        font-weight: 500;
+        padding: 1.25rem;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+        color: var(--bs-primary);
+    }
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: var(--bs-primary);
+    }
+    
+    /* Map Styles */
+    .ratio-16x9 {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    /* Dark Mode */
+    [data-bs-theme="dark"] .contact-hero {
+        background-color: rgba(30, 30, 46, 0.7);
+    }
+    [data-bs-theme="dark"] .stitch-divider:before,
+    [data-bs-theme="dark"] .stitch-divider:after {
+        background: #1e1e1e;
+    }
+    [data-bs-theme="dark"] .accordion-item {
+        background-color: #1e1e1e;
+    }
+    [data-bs-theme="dark"] .accordion-button {
+        background-color: #252525;
+    }
+    [data-bs-theme="dark"] .accordion-button:not(.collapsed) {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+})
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
+// Simulate chat option selection
+document.querySelectorAll('#chatModal .btn-outline-primary').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('chatModal'));
+        modal.hide();
+        alert('Our crochet experts are available Mon-Fri 9am-5pm EST. Please check back during those hours or send us a message!');
+    });
+});
+</script>
+{% endblock %}

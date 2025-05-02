@@ -1,0 +1,58 @@
+<!-- templates/buyer_wishlist.html -->
+{% extends 'base.html' %}
+
+{% block title %}My Wishlist - Crosho{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>My Wishlist</h2>
+    {% if wishlist_items %}
+        <div class="row">
+            {% for item in wishlist_items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ item.product_image }}" class="card-img-top" alt="{{ item.product_name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.product_name }}</h5>
+                            <p class="card-text">
+                                <strong>Price:</strong> {{ item.currency }} {{ item.price }}<br>
+                                <strong>Category:</strong> {{ item.category }}<br>
+                                <strong>Stitch Type:</strong> {{ item.stitch_type|default:"N/A" }}<br>
+                                <strong>Seller:</strong> {{ item.seller_username }}<br>
+                                <strong>Added:</strong> {{ item.added_at|date:"F d, Y" }}
+                            </p>
+                            <a href="{% url 'product_detail' item.product_id %}" class="btn btn-primary">View Product</a>
+                            <form method="POST" action="{% url 'remove_from_wishlist' item.product_id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- Pagination -->
+        {% if page_obj.has_previous or page_obj.has_next %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>Your wishlist is empty.</p>
+    {% endif %}
+</div>
+{% endblock %}

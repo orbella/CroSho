@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Payment Failed | CroSho{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2 class="text-danger mb-3"><i class="fas fa-times-circle"></i> Payment Failed</h2>
+    <p class="lead">Oops! Something went wrong during the payment process. Please try again.</p>
+    <a href="{% url 'checkout' %}" class="btn btn-warning mt-4">Retry Payment</a>
+</div>
+{% endblock %}

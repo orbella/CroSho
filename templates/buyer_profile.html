@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ user_info.username }}'s Profile - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if user_info.profile_picture %}
+                        <img src="/media/{{ user_info.profile_picture }}" 
+                             class="rounded-circle img-fluid mb-3" 
+                             alt="Profile Picture"
+                             style="width: 200px; height: 200px; object-fit: cover;">
+                    {% comment %} {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" 
+                             class="rounded-circle img-fluid mb-3" 
+                             alt="Default Profile"
+                             style="width: 200px; height: 200px; object-fit: cover;"> {% endcomment %}
+                    {% endif %}
+                    
+                    <h3>{{ user_info.first_name }} {{ user_info.last_name }}</h3>
+                    <p class="text-muted">@{{ user_info.username }}</p>
+                    
+                    <div class="d-flex justify-content-center mb-3">
+                        <div class="mx-2 text-center">
+                            <h5 class="mb-0">{{ orders|length }}</h5>
+                            <small class="text-muted">Orders</small>
+                        </div>
+                        <div class="mx-2 text-center">
+                            <h5 class="mb-0">{{ reviews|length }}</h5>
+                            <small class="text-muted">Reviews</small>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+                
+                <div class="card-footer bg-white">
+                    <h5 class="card-title">About</h5>
+                    <p class="card-text">
+                        {% if user_info.bio %}
+                            {{ user_info.bio }}
+                        {% else %}
+                            <span class="text-muted">No bio yet</span>
+                        {% endif %}
+                    </p>
+                    
+                    {% if user_info.address %}
+                        <p class="mb-1">
+                            <i class="fas fa-map-marker-alt text-muted"></i> 
+                            {{ user_info.address }}
+                        </p>
+                    {% endif %}
+                    
+                    {% if user_info.phone_number %}
+                        <p class="mb-1">
+                            <i class="fas fa-phone text-muted"></i> 
+                            {{ user_info.phone_number }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Wishlist Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">My Wishlist</h4>
+                </div>
+                
+                <div class="card-body">
+                    {% if products %}
+                        <div class="row">
+                            {% for product in products %}
+                            {% if product.is_wishlisted %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    {% if product.image %}
+                                        <img src="{% get_media_prefix %}{{ product.image }}" 
+                                             class="card-img-top" 
+                                             alt="{{ product.proname }}"
+                                             style="height: 180px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="{% static 'images/default-product.png' %}" 
+                                             class="card-img-top" 
+                                             alt="Default Product"
+                                             style="height: 180px; object-fit: cover;">
+                                    {% endif %}
+                                    
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ product.proname }}</h5>
+                                        <p class="card-text text-muted">{{ product.category|title }}</p>
+                                        <h5 class="text-primary">
+                                            {% if product.currency == 'USD' %}
+                                                ${{ product.price|floatformat:2 }}
+                                            {% else %}
+                                                ₹{{ product.price|floatformat:2 }}
+                                            {% endif %}
+                                        </h5>
+                                    </div>
+                                    
+                                    <div class="card-footer bg-white">
+                                        <div class="d-flex justify-content-between">
+                                            <a href="{% url 'product_detail' product.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                View Details
+                                            </a>
+                                            <div>
+                                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-heart"></i>
+                                                </a>
+                                                <a href="{% url 'add_to_cart' product.id %}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-cart-plus"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <img src="{% static 'images/no-wishlist.png' %}" 
+                                 alt="No wishlist items" 
+                                 class="img-fluid mb-3"
+                                 style="max-height: 150px;">
+                            <h5>Your wishlist is empty</h5>
+                            <p class="text-muted">Save your favorite items here</p>
+                            <a href="{% url 'shop' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag"></i> Browse Shop
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Reviews Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">My Reviews</h4>
+                </div>
+                
+                <div class="card-body">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="mb-4 pb-3 border-bottom">
+                            <div class="d-flex align-items-start">
+                                {% if user_info.profile_picture %}
+                                    <img src="{% get_media_prefix %}{{ user_info.profile_picture }}" 
+                                         class="rounded-circle me-3" 
+                                         alt="{{ user_info.username }}"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'images/default-profile.png' %}" 
+                                         class="rounded-circle me-3" 
+                                         alt="Default Profile"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                {% endif %}
+                                
+                                <div>
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="mb-1">{{ review.seller_name }}</h5>
+                                        <div class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        {{ review.date|date:"F j, Y" }}
+                                    </small>
+                                    <p class="mt-2 mb-0">{{ review.comment }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <img src="{% static 'images/no-reviews.png' %}" 
+                                 alt="No reviews" 
+                                 class="img-fluid mb-3"
+                                 style="max-height: 150px;">
+                            <h5>No reviews yet</h5>
+                            <p class="text-muted">Your reviews will appear here</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    .badge {
+        font-size: 0.8rem;
+        font-weight: normal;
+    }
+</style>
+{% endblock %}

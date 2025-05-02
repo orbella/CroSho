@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Buy Now - CroSho{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2 style="font-family: 'Playfair Display', serif; color: #5A5A5A; text-align: center;">Buy Now</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 floral-card">
+                {% if product.image %}
+                    <img src="/media/{{ product.image }}" class="card-img-top" alt="{{ product.proname }}" style="max-width: 100%; max-height: 300px; object-fit: contain; border-top-left-radius: 15px; border-top-right-radius: 15px;" onerror="this.onerror=null; this.src='/static/placeholder.jpg';">
+                {% else %}
+                    <div class="card-img-top text-center bg-light" style="height: 200px; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                        <p class="pt-5 text-muted">No image available</p>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #F7C9CC; font-family: 'Playfair Display', serif;">{{ product.proname }}</h5>
+                    <p class="card-text text-muted">{{ product.prodescription }}</p>
+                    <p class="card-text"><strong>Price:</strong> 
+                        {% if product.currency == 'USD' %}
+                            ${{ product.price|floatformat:2 }}
+                        {% else %}
+                            ₹{{ product.price|floatformat:2 }}
+                        {% endif %}
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" name="quantity" value="1" min="1" class="form-control" id="quantity">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shipping_address" class="form-label">Shipping Address</label>
+                            <textarea name="shipping_address" class="form-control" id="shipping_address" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select name="payment_method" class="form-select" id="payment_method" required>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="paypal">PayPal</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .floral-card {
+        background-color: #FFF9F5;
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .floral-card::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: url('https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?auto=format&fit=crop&w=100&q=80') repeat;
+        opacity: 0.2;
+        z-index: -1;
+    }
+    .floral-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    .btn-primary {
+        background: #A3D4D5;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    .btn-primary:hover {
+        background: #D4C9F7;
+        transform: scale(1.05);
+    }
+    .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .card-text {
+        font-size: 0.95rem;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #A3D4D5;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #A3D4D5;
+        box-shadow: 0 0 5px rgba(163, 212, 213, 0.5);
+    }
+</style>
+
+<script>
+    document.querySelectorAll('.btn-primary').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.style.animation = 'yarnSpin 0.5s ease';
+        });
+    });
+
+    const styleSheet = document.createElement('style');
+    styleSheet.innerHTML = `
+        @keyframes yarnSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+</script>
+{% endblock %}

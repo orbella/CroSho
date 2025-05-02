@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.proname }} - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-3">
+                    <!-- Main Image -->
+                    <div class="product-image-main mb-3 rounded-3 overflow-hidden">
+                        <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                             alt="{{ product.proname }}" 
+                             class="img-fluid w-100"
+                             id="mainProductImage">
+                    </div>
+                    
+                    <!-- Thumbnail Gallery -->
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <div class="thumbnail-img active" data-image="{{ MEDIA_URL }}{{ product.image }}">
+                                <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                     alt="{{ product.proname }}" 
+                                     class="img-fluid rounded-2 cursor-pointer">
+                            </div>
+                        </div>
+                        {% for image in product.images.all|slice:":3" %}
+                        <div class="col-3">
+                            <div class="thumbnail-img" data-image="{{ MEDIA_URL }}{{ product.image }}" 
+                                     alt="{{ product.proname }}" 
+                                     class="img-fluid rounded-2 cursor-pointer">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Unique Feature: Stitch Customization Preview -->
+            {% if product.stitch_type %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h3 class="h6 mb-0">Stitch Customization</h3>
+                </div>
+                <div class="card-body">
+                    <div class="stitch-preview-container">
+                        <div class="stitch-preview" style="background-image: url('{% static 'images/stitch-patterns/' %}{{ product.stitch_type }}.png')"></div>
+                        <p class="small text-muted mt-2 mb-0">This item uses <strong>{{ product.stitch_type|title }}</strong> stitch pattern</p>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#stitchGuideModal">
+                            <i class="fas fa-info-circle me-1"></i> View Stitch Guide
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <!-- Category Badge -->
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-2">
+                        {{ product.category|title }}
+                    </span>
+                    
+                    <h1 class="h3 mb-2">{{ product.proname }}</h1>
+                    
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rating-stars me-2">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star{% if forloop.counter <= product.average_rating %} text-warning{% else %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">({{ product.review_count }} reviews)</small>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="d-flex align-items-center mb-3">
+                        <h3 class="h4 mb-0 me-2">
+                            {% if product.currency == 'USD' %}
+                                ${{ product.price|floatformat:2 }}
+                            {% else %}
+                                ₹{{ product.price|floatformat:2 }}
+                            {% endif %}
+                        </h3>
+                        {% if product.original_price %}
+                        <del class="text-muted small">
+                            {% if product.currency == 'USD' %}
+                                ${{ product.original_price|floatformat:2 }}
+                            {% else %}
+                                ₹{{ product.original_price|floatformat:2 }}
+                            {% endif %}
+                        </del>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Unique Feature: Handmade Badge -->
+                    <div class="alert alert-light border mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-hands-helping text-primary me-2"></i>
+                            <div>
+                                <strong>Handmade with care</strong>
+                                <p class="small mb-0">Each piece is uniquely crafted by our artisans</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h4 class="h6 mb-2">Description</h4>
+                        <p>{{ product.description }}</p>
+                    </div>
+                    
+                    <!-- Customization Options -->
+                    {% if product.customizable %}
+                    <div class="mb-4">
+                        <h4 class="h6 mb-2">Customization Options</h4>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Color</label>
+                                <select class="form-select">
+                                    <option>Natural</option>
+                                    <option>Earthy Green</option>
+                                    <option>Soft Pink</option>
+                                    <option>Ocean Blue</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Size</label>
+                                <select class="form-select">
+                                    <option>Small</option>
+                                    <option>Medium</option>
+                                    <option>Large</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Add to Cart -->
+                    <div class="d-flex align-items-center">
+                        <div class="input-group me-3" style="width: 140px;">
+                            <button class="btn btn-outline-secondary minus-btn" type="button">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="form-control text-center quantity-input" value="1" min="1">
+                            <button class="btn btn-outline-secondary plus-btn" type="button">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <form method="POST" action="{% url 'add_to_cart' product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                            </button>
+                        </form>
+                        
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="far fa-heart me-1"></i> Save
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-share-alt me-1"></i> Share
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">
+                            <i class="fas fa-ruler me-1"></i> Size Guide
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Unique Feature: Artisan Profile -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h3 class="h6 mb-0">Meet the Artisan</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <img src="{% static 'images/artisan.jpg' %}" 
+                                 alt="Artisan" 
+                                 class="rounded-circle" 
+                                 width="60" 
+                                 height="60">
+                        </div>
+                        <div>
+                            <h4 class="h6 mb-1">Shobha Jadhav</h4>
+                            <p class="small text-muted mb-2">Crochet artist since 2012</p>
+                            <p class="small mb-0">"Each stitch is made with love and attention to detail."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Tabs -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button">
+                                <i class="fas fa-info-circle me-1"></i> Details
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
+                                <i class="fas fa-star me-1"></i> Reviews
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button">
+                                <i class="fas fa-truck me-1"></i> Shipping
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="productTabsContent">
+                        <div class="tab-pane fade show active" id="details" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="h6 mb-3">Product Details</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><strong>Material:</strong> 100% Cotton Yarn</li>
+                                        <li class="mb-2"><strong>Dimensions:</strong> 12" x 8"</li>
+                                        <li class="mb-2"><strong>Weight:</strong> 150g</li>
+                                        <li class="mb-2"><strong>Care Instructions:</strong> Hand wash, lay flat to dry</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="h6 mb-3">Why We Love It</h5>
+                                    <ul>
+                                        <li class="mb-2">Eco-friendly materials</li>
+                                        <li class="mb-2">Ethically handmade</li>
+                                        <li class="mb-2">Unique design elements</li>
+                                        <li class="mb-2">Supports local artisans</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            {% if product.reviews.all %}
+                                {% for review in product.reviews.all|slice:":3" %}
+                                <div class="mb-4 pb-4 border-bottom">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <div>
+                                            <strong>{{ review.user.username }}</strong>
+                                            <div class="rating-stars small">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star{% if forloop.counter <= review.rating %} text-warning{% else %} text-muted{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p>{{ review.comment }}</p>
+                                </div>
+                                {% endfor %}
+                                <a href="#" class="btn btn-outline-primary">See All Reviews</a>
+                            {% else %}
+                                <p>No reviews yet. Be the first to review!</p>
+                                <button class="btn btn-primary">Write a Review</button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="tab-pane fade" id="shipping" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="h6 mb-3">Shipping Information</h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-truck me-2 text-muted"></i> Free shipping on orders over Rs.2000</li>
+                                        <li class="mb-2"><i class="fas fa-clock me-2 text-muted"></i> Processing time: 1-3 business days</li>
+                                        <li class="mb-2"><i class="fas fa-box me-2 text-muted"></i> Ships from our artisan studio</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="h6 mb-3">Return Policy</h5>
+                                    <p>We accept returns within 14 days of delivery. Handmade items must be returned in original condition.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="h4 mb-4">You May Also Like</h3>
+            <div class="row">
+                {% for related in related_products|slice:":4" %}
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        <a href="{% url 'product_detail' related.id %}">
+                            <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                 class="card-img-top" 
+                                 alt="{{ related.proname }}">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title h6 mb-1">
+                                <a href="{% url 'product_detail' related.id %}" class="text-decoration-none">{{ related.proname }}</a>
+                            </h5>
+                            <div class="rating-stars small mb-2">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star{% if forloop.counter <= related.average_rating %} text-warning{% else %} text-muted{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <p class="card-text mb-0">
+                                {% if related.currency == 'USD' %}
+                                    ${{ related.price|floatformat:2 }}
+                                {% else %}
+                                    ₹{{ related.price|floatformat:2 }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <button class="btn btn-sm btn-outline-primary w-100 add-to-cart-btn" data-product-id="{{ related.id }}">
+                                <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stitch Guide Modal -->
+<div class="modal fade" id="stitchGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ product.stitch_type|title }} Stitch Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                             alt="{{ product.stitch_type|title }} Stitch" 
+                             class="img-fluid rounded mb-3">
+                    </div>
+                    <div class="col-md-6">
+                        <h6>About This Stitch</h6>
+                        <p>The {{ product.stitch_type|title }} stitch creates a beautiful textured pattern that's perfect for this design. Each piece takes approximately 8-10 hours to complete by hand.</p>
+                        
+                        <h6 class="mt-4">Care Instructions</h6>
+                        <ul>
+                            <li>Hand wash in cool water</li>
+                            <li>Lay flat to dry</li>
+                            <li>Do not bleach or iron</li>
+                            <li>Store folded to maintain shape</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Size Guide Modal -->
+<div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Size Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Size</th>
+                                <th>Length</th>
+                                <th>Width</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Small</td>
+                                <td>10 inches</td>
+                                <td>6 inches</td>
+                            </tr>
+                            <tr>
+                                <td>Medium</td>
+                                <td>12 inches</td>
+                                <td>8 inches</td>
+                            </tr>
+                            <tr>
+                                <td>Large</td>
+                                <td>14 inches</td>
+                                <td>10 inches</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mt-3">All measurements are approximate and may vary slightly due to the handmade nature of our products.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Product Image Gallery */
+    .product-image-main {
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+    
+    .thumbnail-img {
+        border: 2px solid transparent;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .thumbnail-img:hover, .thumbnail-img.active {
+        border-color: #4e73df;
+    }
+    
+    .thumbnail-img img {
+        transition: transform 0.3s ease;
+    }
+    
+    .thumbnail-img:hover img {
+        transform: scale(1.05);
+    }
+    
+    /* Stitch Preview */
+    .stitch-preview-container {
+        text-align: center;
+    }
+    
+    .stitch-preview {
+        width: 100%;
+        height: 100px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 0.5rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Product Card Hover Effect */
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Quantity Input */
+    .quantity-input {
+        -moz-appearance: textfield;
+        text-align: center;
+    }
+    
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    /* Rating Stars */
+    .rating-stars {
+        color: #ffc107;
+    }
+    
+    .rating-stars .text-muted {
+        color: #d1d3e2 !important;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 767.98px) {
+        .product-image-main {
+            height: 300px;
+        }
+        
+        .product-card .card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image Gallery Functionality
+    document.querySelectorAll('.thumbnail-img').forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+            // Remove active class from all thumbnails
+            document.querySelectorAll('.thumbnail-img').forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked thumbnail
+            this.classList.add('active');
+            
+            // Update main image
+            const mainImage = document.getElementById('mainProductImage');
+            mainImage.src = this.getAttribute('data-image');
+        });
+    });
+    
+    // Quantity Adjustment
+    document.querySelectorAll('.plus-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.parentNode.querySelector('.quantity-input');
+            input.value = parseInt(input.value) + 1;
+        });
+    });
+    
+    document.querySelectorAll('.minus-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.parentNode.querySelector('.quantity-input');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+    });
+    
+    // Add to Cart Functionality
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const quantity = document.querySelector('.quantity-input').value;
+            
+            fetch('/cart/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                    toast.show();
+                    
+                    // Update cart count
+                    document.getElementById('cartCount').textContent = data.cart_count;
+                }
+            });
+        });
+    });
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

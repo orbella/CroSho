@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Video Background -->
+<div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; overflow: hidden;">
+    <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-crochet-work-11739-large.mp4" type="video/mp4">
+    </video>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(248, 241, 233, 0.85);"></div>
+</div>
+
+<div class="container-fluid py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <!-- Left Column - Visual Branding -->
+        <div class="col-lg-5 d-none d-lg-flex align-items-center justify-content-center">
+            <div class="text-center p-5" style="max-width: 500px;">
+                <div class="mb-4">
+                    <i class="fas fa-wool-knit display-1" style="color: #5E807F;"></i>
+                    <h1 class="mt-3" style="font-family: 'Playfair Display', serif; color: #5E807F;">CroSho</h1>
+                    <p class="lead" style="color: #D4A5A5;">Where every stitch tells a story</p>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div class="border-end pe-3 me-3" style="border-color: #A3D4D5 !important;">
+                        <div class="text-muted small">Already a member?</div>
+                        <a href="{% url 'login' %}" class="btn btn-sm mt-2 rounded-0" 
+                           style="background-color: #D4A5A5; color: white; border: 1px solid #D4A5A5;">
+                            Sign In
+                        </a>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Explore our</div>
+                        <a href="#" class="btn btn-sm mt-2 rounded-0" 
+                           style="background-color: transparent; color: #5E807F; border: 1px solid #5E807F;">
+                            Gallery
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Registration Form -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow" style="background-color: rgba(255, 255, 255, 0.95); border-radius: 0;">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="mb-4 text-center" style="color: #5E807F; font-family: 'Playfair Display', serif;">Create Your Account</h3>
+                    
+                    <form method="post" enctype="multipart/form-data" id="registrationForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Left Form Column -->
+                            <div class="col-md-6">
+                                <!-- Name Fields -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">First Name</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="first_name" pattern="^[a-zA-Z]+$" required>
+                                    <div class="invalid-feedback small">Letters only please</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Last Name</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="last_name" pattern="^[a-zA-Z]+$" required>
+                                    <div class="invalid-feedback small">Letters only please</div>
+                                </div>
+
+                                <!-- Username -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                              style="border-bottom: 2px solid #D4A5A5;">
+                                            <i class="fas fa-at" style="color: #5E807F;"></i>
+                                        </span>
+                                        <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                               style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                               name="username" pattern="^[a-zA-Z][a-zA-Z0-9_]*$" required>
+                                    </div>
+                                    <div class="invalid-feedback small">Start with a letter</div>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                              style="border-bottom: 2px solid #D4A5A5;">
+                                            <i class="fas fa-envelope" style="color: #5E807F;"></i>
+                                        </span>
+                                        <input type="email" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                               style="border-bottom: 2px solid #D4A5A5; background-color: transparent;" 
+                                               name="email" required>
+                                    </div>
+                                    <div class="invalid-feedback small">Valid email required</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Form Column -->
+                            <div class="col-md-6">
+                                <!-- Password -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                              style="border-bottom: 2px solid #D4A5A5;">
+                                            <i class="fas fa-lock" style="color: #5E807F;"></i>
+                                        </span>
+                                        <input type="password" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                               style="border-bottom: 2px solid #D4A5A5; background-color: transparent;" 
+                                               name="password" minlength="8" required>
+                                    </div>
+                                    <div class="invalid-feedback small">Min 8 characters</div>
+                                </div>
+
+                                <!-- Profile Picture -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Profile Image</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                              style="border-bottom: 2px solid #D4A5A5;">
+                                            <i class="fas fa-camera" style="color: #5E807F;"></i>
+                                        </span>
+                                        <input type="file" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                               style="border-bottom: 2px solid #D4A5A5; background-color: transparent;" 
+                                               name="profile_picture" accept="image/*" required>
+                                    </div>
+                                    <div class="invalid-feedback small">Image required</div>
+                                </div>
+
+                                <!-- Role Selection -->
+                                <div class="mb-3">
+                                    <label class="form-label small text-uppercase text-muted">I Want To Join As</label>
+                                    <div class="d-flex">
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="user_type" id="buyer" value="buyer" required>
+                                            <label class="form-check-label small" for="buyer">
+                                                <i class="fas fa-shopping-bag me-1"></i> Buyer
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="user_type" id="seller" value="seller">
+                                            <label class="form-check-label small" for="seller">
+                                                <i class="fas fa-tshirt me-1"></i> Seller
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback small d-block">Please select one</div>
+                                </div>
+
+                                <!-- Terms and Conditions -->
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="terms" required>
+                                    <label class="form-check-label small" for="terms">
+                                        I agree to the <a href="#" style="color: #5E807F; text-decoration: underline;">Terms of Service</a> and 
+                                        <a href="#" style="color: #5E807F; text-decoration: underline;">Privacy Policy</a>
+                                    </label>
+                                    <div class="invalid-feedback small">You must agree to terms</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-lg rounded-0 text-white py-3" 
+                                    style="background-color: #5E807F; letter-spacing: 1px; border: none;">
+                                <i class="fas fa-yarn me-2"></i> CREATE ACCOUNT
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap');
+    
+    body {
+        font-family: 'Montserrat', sans-serif;
+        overflow-x: hidden;
+    }
+    .card {
+        backdrop-filter: blur(5px);
+    }
+    .form-control {
+        border-radius: 0 !important;
+    }
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #5E807F;
+    }
+    .btn:hover {
+        background-color: #4a6c6b !important;
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    .invalid-feedback {
+        opacity: 0;
+        height: 0;
+        transition: all 0.3s ease;
+    }
+    .was-validated .form-control:invalid ~ .invalid-feedback,
+    .was-validated .form-control:valid ~ .invalid-feedback,
+    .was-validated .form-check-input:invalid ~ .invalid-feedback {
+        opacity: 1;
+        height: auto;
+    }
+    .input-group-text {
+        transition: all 0.3s ease;
+    }
+    .form-check-input:checked {
+        background-color: #5E807F;
+        border-color: #5E807F;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Form validation
+        const form = document.getElementById('registrationForm');
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Input focus effects
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderBottom = '2px solid #5E807F';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#D4A5A5';
+                }
+            });
+            input.addEventListener('blur', function() {
+                this.style.borderBottom = '2px solid #D4A5A5';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#5E807F';
+                }
+            });
+        });
+
+        // Video mute toggle
+        const video = document.querySelector('video');
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyM') {
+                video.muted = !video.muted;
+            }
+        });
+    });
+</script>
+{% endblock %}

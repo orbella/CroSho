@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - CroSho{% endblock %}
+
+{% block content %}
+
+<!-- Video Background -->
+<div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; overflow: hidden;">
+    <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-crochet-work-11739-large.mp4" type="video/mp4">
+    </video>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(248, 241, 233, 0.85);"></div>
+</div>
+
+<div class="container-fluid py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <!-- Left Column - Visual Branding -->
+        <div class="col-lg-5 d-none d-lg-flex align-items-center justify-content-center">
+            <div class="text-center p-5" style="max-width: 500px;">
+                <div class="mb-4">
+                    <i class="fas fa-wool-knit display-1" style="color: #5E807F;"></i>
+                    <h1 class="mt-3" style="font-family: 'Playfair Display', serif; color: #5E807F;">CroSho</h1>
+                    <p class="lead" style="color: #D4A5A5;">Where every stitch connects</p>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div class="border-end pe-3 me-3" style="border-color: #A3D4D5 !important;">
+                        <div class="text-muted small">New to CroSho?</div>
+                        <a href="{% url 'register' %}" class="btn btn-sm mt-2 rounded-0" 
+                           style="background-color: #D4A5A5; color: white; border: 1px solid #D4A5A5;">
+                            Sign Up
+                        </a>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Need help?</div>
+                        <a href="#" class="btn btn-sm mt-2 rounded-0" 
+                           style="background-color: transparent; color: #5E807F; border: 1px solid #5E807F;">
+                            Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Login Form -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow" style="background-color: rgba(255, 255, 255, 0.95); border-radius: 0;">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="mb-4 text-center" style="color: #5E807F; font-family: 'Playfair Display', serif;">Welcome Back</h3>
+                    <p class="text-center text-muted mb-4 small">Continue your creative journey with us</p>
+                    
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-0" role="alert" 
+                             style="border-left: 4px solid {% if message.tags == 'success' %}#5E807F{% else %}#D4A5A5{% endif %};">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" action="{% url 'login' %}" id="loginForm">
+                        {% csrf_token %}
+                        
+                        <!-- Username/Email -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase text-muted">Username or Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                      style="border-bottom: 2px solid #D4A5A5;">
+                                    <i class="fas fa-user" style="color: #5E807F;"></i>
+                                </span>
+                                <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                       style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                       name="username" required autofocus>
+                            </div>
+                        </div>
+                        
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase text-muted">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                      style="border-bottom: 2px solid #D4A5A5;">
+                                    <i class="fas fa-lock" style="color: #5E807F;"></i>
+                                </span>
+                                <input type="password" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                       style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                       id="password" name="password" required>
+                                <button class="btn bg-transparent rounded-0 border-top-0 border-start-0 border-end-0 toggle-password" 
+                                        type="button" style="border-bottom: 2px solid #D4A5A5;">
+                                    <i class="fas fa-eye" style="color: #5E807F;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="d-flex justify-content-between mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember" 
+                                       style="border: 1px solid #5E807F;">
+                                <label class="form-check-label small" for="remember">Remember me</label>
+                            </div>
+                            <a href="#" class="small text-decoration-none" style="color: #5E807F;">Forgot password?</a>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-lg rounded-0 text-white py-3" 
+                                    style="background-color: #5E807F; letter-spacing: 1px; border: none;">
+                                <i class="fas fa-sign-in-alt me-2"></i> LOGIN
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Social Login -->
+                    <div class="text-center mt-4">
+                        <p class="small text-muted mb-3">Or continue with</p>
+                        <div class="d-flex justify-content-center">
+                            <a href="#" class="btn btn-outline-secondary rounded-circle mx-2" 
+                               style="width: 40px; height: 40px; border-color: #A3D4D5;">
+                                <i class="fab fa-google" style="color: #5E807F;"></i>
+                            </a>
+                            <a href="#" class="btn btn-outline-secondary rounded-circle mx-2" 
+                               style="width: 40px; height: 40px; border-color: #A3D4D5;">
+                                <i class="fab fa-facebook-f" style="color: #5E807F;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap');
+    
+    body {
+        font-family: 'Montserrat', sans-serif;
+        overflow-x: hidden;
+    }
+    .card {
+        backdrop-filter: blur(5px);
+    }
+    .form-control {
+        border-radius: 0 !important;
+    }
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #5E807F;
+    }
+    .btn:hover {
+        background-color: #4a6c6b !important;
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    .input-group-text {
+        transition: all 0.3s ease;
+    }
+    .form-check-input:checked {
+        background-color: #5E807F;
+        border-color: #5E807F;
+    }
+    .toggle-password:hover i {
+        color: #D4A5A5 !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const passwordInput = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Input focus effects
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderBottom = '2px solid #5E807F';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#D4A5A5';
+                }
+            });
+            input.addEventListener('blur', function() {
+                this.style.borderBottom = '2px solid #D4A5A5';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#5E807F';
+                }
+            });
+        });
+
+        // Video mute toggle
+        const video = document.querySelector('video');
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyM') {
+                video.muted = !video.muted;
+            }
+        });
+    });
+</script>
+{% endblock %}

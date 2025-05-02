@@ -1,0 +1,804 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+{% block title %}My Cart | CroSho{% endblock %}
+
+{% block content %}
+<div class="cart-page py-5" style="padding-bottom: 100px;">
+    <!-- Cart Header with Project Progress -->
+    <div class="cart-header py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-0">
+                        <i class="fas fa-shopping-cart text-primary me-2"></i> My Yarn Basket
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Your Stash</li>
+                        </ol>
+                    </nav>
+                    
+                    <!-- Project Progress Bar -->
+                    <div class="progress mt-3" style="height: 10px;">
+                        <div class="progress-bar progress-bar-striped" 
+                             role="progressbar" 
+                             style="width: {% widthratio cart_items|length 10 100 %}%" 
+                             aria-valuenow="{{ cart_items|length }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="10">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {% if items_for_free > 0 %}
+                          Add {{ items_for_free }} more item{% if items_for_free > 1 %}s{% endif %} for a free pattern!
+                        {% else %}
+                          Your basket is full! Time to start crafting.
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'shop' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Continue Stash Shopping
+                    </a>
+                    <a href="{% url 'patterns' %}" class="btn btn-outline-success ms-2">
+                        <i class="fas fa-book-open me-2"></i> Browse Patterns
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if cart_items %}
+        <div class="row">
+            <!-- Cart Items Column -->
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-shopping-basket text-primary me-2"></i> Your Crafting Supplies
+                        </h3>
+                        <span class="badge bg-primary">
+                            {{ cart_items|length }} item{{ cart_items|pluralize }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Project Material</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart_items %}
+                                    <tr id="cart-item-{{ item.product_id }}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.image %}
+                                                <img src="{{ item.image }}" class="rounded me-3" width="60" height="60" 
+                                                     alt="{{ item.product_name }}" style="object-fit: contain;">
+                                                {% else %}
+                                                <div class="rounded bg-light d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <span class="d-block fw-bold">{{ item.product_name }}</span>
+                                                    <small class="text-muted d-block">SKU: {{ item.sku }}</small>
+                                                    <small class="text-info">
+                                                        <i class="fas fa-info-circle"></i> 
+                                                        {% if item.stitch_type %}
+                                                        Perfect for {{ item.stitch_type }} stitch
+                                                        {% else %}
+                                                        Versatile for multiple techniques
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if item.currency == 'USD' %}
+                                            <span class="text-primary">${{ item.price|floatformat:2 }}</span>
+                                            <small class="text-muted d-block">≈ ₹{{ item.price|multiply:83|floatformat:2 }}</small>
+                                            {% else %}
+                                            <span class="text-primary">₹{{ item.price|floatformat:2 }}</span>
+                                            <small class="text-muted d-block">≈ ${{ item.price|divide:83|floatformat:2 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td class="price-per-unit" data-product-id="{{ item.product_id }}">
+                                            ₹{{ item.price|floatformat:2 }}
+                                        </td>
+                                        <td>
+                                            <div class="input-group quantity-selector" style="max-width: 120px;">
+                                                <button class="btn btn-outline-secondary minus-btn" 
+                                                        type="button" 
+                                                        data-product-id="{{ item.product_id }}">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <input type="number" 
+                                                       class="form-control text-center quantity-input" 
+                                                       value="{{ item.quantity }}" 
+                                                       min="1" 
+                                                       max="{{ item.max_quantity }}"
+                                                       data-product-id="{{ item.product_id }}">
+                                                <button class="btn btn-outline-secondary plus-btn" 
+                                                        type="button" 
+                                                        data-product-id="{{ item.product_id }}">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td class="subtotal" data-product-id="{{ item.product_id }}">
+                                            {% if item.currency == 'USD' %}
+                                            <span class="fw-bold">${{ item.total_price|floatformat:2 }}</span>
+                                            <small class="text-muted d-block">≈ ₹{{ item.total_price|multiply:83|floatformat:2 }}</small>
+                                            {% else %}
+                                            <span class="fw-bold">₹{{ item.total_price|floatformat:2 }}</span>
+                                            <small class="text-muted d-block">≈ ${{ item.total_price|divide:83|floatformat:2 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger remove-btn" 
+                                                    data-product-id="{{ item.product_id }}"
+                                                    title="Remove from Cart">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info mt-2 save-btn"
+                                                    data-product-id="{{ item.product_id }}"
+                                                    title="Save for Later">
+                                                <i class="far fa-bookmark"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pattern Suggestions -->
+                        <div class="mt-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-lightbulb text-warning me-2"></i> 
+                                Pattern Ideas for Your Stash
+                            </h5>
+                            <div class="row">
+                                {% for pattern in suggested_patterns|slice:":3" %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <img src="{{ pattern.image_url }}" class="card-img-top" alt="{{ pattern.title }}">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ pattern.title }}</h6>
+                                            <p class="card-text small">{{ pattern.description|truncatewords:15 }}</p>
+                                            <a href="#" class="btn btn-sm btn-outline-primary">View Pattern</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm" 
+                     style="position: sticky; top: 100px; bottom: 20px; overflow-y: auto; max-height: calc(100vh - 200px);">
+                    <div class="card-header bg-white">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-receipt text-primary me-2"></i> Stash Summary
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Discount Code Section -->
+                        <div class="card mb-3 border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-tag me-2"></i> Yarn Discount
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if discount %}
+                                <div class="alert alert-success">
+                                    <strong>Discount Applied:</strong> {{ discount.code }}
+                                    ({% if discount.type == 'percentage' %}
+                                        {{ discount.amount }}% off
+                                    {% else %}
+                                        ₹{{ discount.amount|floatformat:2 }} off
+                                    {% endif %})
+                                    <a href="{% url 'remove_discount' %}" class="float-end text-danger">
+                                        <i class="fas fa-times"></i> Remove
+                                    </a>
+                                </div>
+                                {% else %}
+                                <form method="post" action="{% url 'apply_discount' %}" class="input-group">
+                                    {% csrf_token %}
+                                    <input type="text" name="code" class="form-control" placeholder="CROCHETLOVE">
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </form>
+                                <small class="text-muted mt-1 d-block">
+                                    Try: CROCHETLOVE for 15% off
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="cart-totals">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal ({{ cart_items|length }} items):</span>
+                                <span id="cart-subtotal">
+                                    ₹{{ subtotal|floatformat:2 }}<br>
+                                    <small class="text-muted">≈ ${{ subtotal|divide:83|floatformat:2 }}</small>
+                                </span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping:</span>
+                                <span id="shipping-cost">
+                                    {% if shipping_cost == 0 %}
+                                        <span class="text-success">FREE</span>
+                                    {% else %}
+                                        ₹{{ shipping_cost|floatformat:2 }}
+                                        <small class="text-muted d-block">≈ ${{ shipping_cost|divide:83|floatformat:2 }}</small>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            {% if discount %}
+                            <div class="d-flex justify-content-between mb-2 text-success">
+                                <span>Discount ({{ discount.code }}):</span>
+                                <span id="discount-amount">
+                                    -₹{{ discount_amount|floatformat:2 }}<br>
+                                    <small class="text-muted">≈ -${{ discount_amount|divide:83|floatformat:2 }}</small>
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between border-top pt-2 mb-3">
+                                <strong>Total (INR):</strong>
+                                <strong id="cart-total-inr">
+                                    ₹{{ total|floatformat:2 }}<br>
+                                    <small class="text-muted">≈ ${{ total|divide:83|floatformat:2 }}</small>
+                                </strong>
+                            </div>
+                            
+                            <!-- Estimated Delivery -->
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-truck me-2"></i>
+                                <strong>Estimated Delivery:</strong> 
+                                3-5 business days<br>
+                                <small>Free pattern included with every order!</small>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'checkout' %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-lock me-2"></i> Secure Checkout
+                                </a>
+                                <button id="rzp-button" class="btn btn-success btn-lg">
+                                    <i class="fas fa-bolt me-2"></i> Quick Pay with Razorpay
+                                </button>                                
+                                <a href="{% url 'patterns' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-book me-2"></i> Get Inspired First
+                                </a>
+                            </div>
+                            
+                            <!-- Safety Badges -->
+                            <div class="mt-3 text-center">
+                                <img src="{% static 'images/secure-badge.png' %}" alt="Secure Payment" style="height: 40px;" class="me-2">
+                                <img src="{% static 'images/eco-friendly-badge.png' %}" alt="Eco Friendly" style="height: 40px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="empty-cart-icon mb-4">
+                <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+            </div>
+            <h4 class="text-muted mb-3">Your yarn basket is empty!</h4>
+            <p class="mb-4">Start your next crochet adventure with our premium supplies</p>
+            <a href="{% url 'shop' %}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-store me-2"></i> Explore Yarns
+            </a>
+            <a href="{% url 'patterns' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-book-open me-2"></i> Browse Patterns
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-page {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 40px;
+    }
+
+    .cart-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #eaeaea;
+    }
+
+    .progress-bar {
+        background-color: #9c27b0;
+        transition: width 0.6s ease;
+    }
+
+    .quantity-selector .form-control {
+        padding: 0.375rem;
+    }
+
+    .quantity-selector button {
+        width: 2.5rem;
+    }
+
+    .quantity-selector button:hover {
+        background-color: #e9ecef;
+    }
+
+    .save-btn:hover {
+        color: #fff;
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    @media (max-width: 991.98px) {
+        .sticky-top {
+            position: static;
+            max-height: none !important;
+        }
+    }
+
+    /* Razorpay button styling */
+    #rzp-button {
+        background-color: #5266df;
+        border-color: #5266df;
+        transition: all 0.3s ease;
+    }
+
+    #rzp-button:hover {
+        background-color: #3a4cd1;
+        border-color: #3a4cd1;
+        transform: translateY(-2px);
+    }
+
+    /* Pattern card hover effect */
+    .card.h-100:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    /* Animation for quantity updates */
+    .quantity-input.updating {
+        background-color: #fff3cd;
+    }
+    
+    .quantity-input.updated {
+        background-color: #d4edda;
+        transition: background-color 1s ease;
+    }
+    
+    /* Fade out animation for removed items */
+    tr.fade-out {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Global Constants
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    const FREE_SHIPPING_THRESHOLD = 4000;
+    const CURRENCY_CONVERSION = 83;
+    
+    // Helper Functions
+    const formatCurrency = (value) => {
+        const num = parseFloat(value) || 0;
+        return num.toFixed(2);
+    };
+    
+    const showAlert = (icon, title, text, timer = 1500) => {
+        Swal.fire({ icon, title, text, showConfirmButton: false, timer });
+    };
+    
+    // Initialize Razorpay
+    const initRazorpay = () => {
+        const rzpButton = document.getElementById('rzp-button');
+        if (!rzpButton) return;
+        
+        rzpButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            try {
+                const response = await fetch("{% url 'create_razorpay_order' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": CSRF_TOKEN
+                    },
+                    body: JSON.stringify({
+                        amount_inr: parseFloat("{{ total|floatformat:2 }}") * 100
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const options = {
+                        key: "{{ razorpay_key_id }}",
+                        amount: data.order.amount,
+                        currency: "INR",
+                        order_id: data.order.id,
+                        name: "CroSho",
+                        description: "Yarn Purchase",
+                        image: "{% static 'images/logo.png' %}",
+                        handler: function(response) {
+                            window.location.href = `{% url 'order_success' %}?payment_id=${response.razorpay_payment_id}`;
+                        },
+                        prefill: {
+                            name: '{{ request.user.get_full_name|default:"Crochet Lover" }}',
+                            email: '{{ request.user.email|default:"customer@example.com" }}',
+                            contact: '{{ request.user.phone_number|default:"9999999999" }}'
+                        },
+                        theme: { color: "#5E807F" }
+                    };
+                    
+                    new Razorpay(options).open();
+                } else {
+                    throw new Error(data.message || "Payment initialization failed");
+                }
+            } catch (error) {
+                console.error("Razorpay error:", error);
+                showAlert('error', 'Payment Error', error.message);
+            }
+        });
+    };
+    
+    // Cart Update Functions
+    const updateCartUI = (data, productId) => {
+        // Update individual item
+        if (data.item_total) {
+            const subtotalElement = document.querySelector(`.subtotal[data-product-id="${productId}"]`);
+            if (subtotalElement) {
+                subtotalElement.innerHTML = data.item_currency === 'USD' ?
+                    `<span class="fw-bold">$${formatCurrency(data.item_total)}</span>
+                     <small class="text-muted">≈ ₹${formatCurrency(data.item_total * CURRENCY_CONVERSION)}</small>` :
+                    `<span class="fw-bold">₹${formatCurrency(data.item_total)}</span>
+                     <small class="text-muted">≈ $${formatCurrency(data.item_total / CURRENCY_CONVERSION)}</small>`;
+            }
+        }
+        
+        // Update cart totals
+        if (data.cart_totals) {
+            const updateElement = (id, content) => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = content;
+            };
+            
+            updateElement('cart-subtotal', 
+                `₹${formatCurrency(data.cart_totals.subtotal)}<br>
+                 <small class="text-muted">≈ $${formatCurrency(data.cart_totals.subtotal / CURRENCY_CONVERSION)}</small>`);
+            
+            updateElement('shipping-cost',
+                data.cart_totals.subtotal >= FREE_SHIPPING_THRESHOLD ?
+                '<span class="text-success">FREE</span>' :
+                `₹${formatCurrency(data.cart_totals.shipping)}<br>
+                 <small class="text-muted">≈ $${formatCurrency(data.cart_totals.shipping / CURRENCY_CONVERSION)}</small>`);
+            
+            if (data.cart_totals.discount > 0) {
+                updateElement('discount-amount',
+                    `-₹${formatCurrency(data.cart_totals.discount)}<br>
+                     <small class="text-muted">≈ -$${formatCurrency(data.cart_totals.discount / CURRENCY_CONVERSION)}</small>`);
+            }
+            
+            updateElement('cart-total-inr',
+                `₹${formatCurrency(data.cart_totals.total)}<br>
+                 <small class="text-muted">≈ $${formatCurrency(data.cart_totals.total / CURRENCY_CONVERSION)}</small>`);
+        }
+        
+        // Update item count
+        const itemCount = document.querySelectorAll('tbody tr:not(.fade-out)').length;
+        const badge = document.querySelector('.badge.bg-primary');
+        if (badge) badge.textContent = `${itemCount} item${itemCount !== 1 ? 's' : ''}`;
+    };
+    
+    // Quantity Update Handler
+    const updateQuantity = async (productId, newQuantity) => {
+        const input = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+        const subtotalElement = document.querySelector(`.subtotal[data-product-id="${productId}"]`);
+        const originalValue = input?.value || 1;
+        
+        if (!input || !subtotalElement) {
+            showAlert('error', 'Error', 'Could not find product elements');
+            return;
+        }
+        
+        try {
+            // Show loading state
+            input.disabled = true;
+            input.classList.add('updating');
+            input.value = '...';
+            
+            const response = await fetch('{% url "update_cart" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({ 
+                    product_id: productId, 
+                    quantity: newQuantity 
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update the individual item's subtotal
+                const pricePerUnit = parseFloat(document.querySelector(`[data-product-id="${productId}"] .price-per-unit`).textContent.replace(/[^\d.-]/g, ''));
+                const newSubtotal = pricePerUnit * newQuantity;
+                
+                subtotalElement.innerHTML = `
+                    <span class="fw-bold">₹${newSubtotal.toFixed(2)}</span>
+                    <small class="text-muted d-block">≈ $${(newSubtotal / 83).toFixed(2)}</small>
+                `;
+    
+                // Recalculate cart totals
+                let newCartSubtotal = 0;
+                document.querySelectorAll('.subtotal .fw-bold').forEach(el => {
+                    newCartSubtotal += parseFloat(el.textContent.replace(/[^\d.-]/g, ''));
+                });
+    
+                const newShippingCost = newCartSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 50; // Example shipping
+                const newCartTotal = newCartSubtotal + newShippingCost;
+    
+                // Update all cart totals
+                document.getElementById('cart-subtotal').innerHTML = `
+                    ₹${newCartSubtotal.toFixed(2)}<br>
+                    <small class="text-muted">≈ $${(newCartSubtotal / 83).toFixed(2)}</small>
+                `;
+    
+                document.getElementById('shipping-cost').innerHTML = 
+                    newCartSubtotal >= FREE_SHIPPING_THRESHOLD ?
+                    '<span class="text-success">FREE</span>' :
+                    `₹${newShippingCost.toFixed(2)}<br>
+                     <small class="text-muted">≈ $${(newShippingCost / 83).toFixed(2)}</small>`;
+    
+                document.getElementById('cart-total-inr').innerHTML = `
+                    ₹${newCartTotal.toFixed(2)}<br>
+                    <small class="text-muted">≈ $${(newCartTotal / 83).toFixed(2)}</small>
+                `;
+    
+        } catch (error) {
+            console.error('Update error:', error);
+            input.value = originalValue;
+            showAlert('error', 'Error', error.message);
+        } finally {
+            input.disabled = false;
+            input.classList.remove('updating');
+        }
+    };
+    
+    // Quantity Controls
+    const setupQuantityControls = () => {
+        let debounceTimer;
+        
+        // Input field handler
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const productId = this.dataset.productId;
+                    let newQuantity = Math.max(1, parseInt(this.value) || 1);
+                    const maxQuantity = parseInt(this.max) || 999;
+                    
+                    if (newQuantity > maxQuantity) {
+                        this.value = maxQuantity;
+                        showAlert('warning', 'Limit', `Max ${maxQuantity} allowed`);
+                        newQuantity = maxQuantity;
+                    }
+                    
+                    updateQuantity(productId, newQuantity);
+                }, 500);
+            });
+        });
+        
+        // Plus/Minus buttons
+        document.querySelectorAll('.plus-btn, .minus-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                const input = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+                if (!input) return;
+                
+                const isPlus = this.classList.contains('plus-btn');
+                let newQuantity = parseInt(input.value) + (isPlus ? 1 : -1);
+                newQuantity = Math.max(1, newQuantity);
+                
+                // Visual feedback
+                this.classList.add('active');
+                setTimeout(() => this.classList.remove('active'), 200);
+                
+                input.value = newQuantity;
+                updateQuantity(productId, newQuantity);
+            });
+        });
+    };
+    
+    // Item Removal Handler
+    const setupRemoveItem = () => {
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.dataset.productId;
+                const productRow = document.getElementById(`cart-item-${productId}`);
+                const productName = productRow?.querySelector('.fw-bold')?.textContent || 'this item';
+                
+                const { isConfirmed } = await Swal.fire({
+                    title: `Remove ${productName}?`,
+                    text: "This will delete it from your cart",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Remove it!',
+                    cancelButtonText: 'Keep it'
+                });
+                
+                if (isConfirmed && productRow) {
+                    try {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        const response = await fetch("{% url 'remove_from_cart' %}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": CSRF_TOKEN
+                            },
+                            body: JSON.stringify({ product_id: productId })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (!data.success) {
+                            throw new Error(data.message || 'Failed to remove item');
+                        }
+                        
+                        // Animate removal
+                        productRow.classList.add('fade-out');
+                        setTimeout(() => {
+                            productRow.remove();
+                            if (document.querySelectorAll('tbody tr').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                        
+                        showAlert('success', 'Removed!', 'Item deleted from cart');
+                        
+                    } catch (error) {
+                        console.error('Remove error:', error);
+                        showAlert('error', 'Error', error.message);
+                    } finally {
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    }
+                }
+            });
+        });
+    };
+    
+    // Save for Later Handler
+    const setupSaveForLater = () => {
+        document.querySelectorAll('.save-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const productId = this.dataset.productId;
+                const productRow = document.getElementById(`cart-item-${productId}`);
+                const productName = productRow?.querySelector('.fw-bold')?.textContent || 'this item';
+                
+                const { isConfirmed } = await Swal.fire({
+                    title: `Save ${productName}?`,
+                    text: "Move to your wishlist?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Move to Wishlist',
+                    cancelButtonText: 'Keep in Cart'
+                });
+                
+                if (isConfirmed && productRow) {
+                    try {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        
+                        const response = await fetch("{% url 'add_remove_wishlist' %}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": CSRF_TOKEN
+                            },
+                            body: JSON.stringify({ product_id: productId })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (!data.success) {
+                            throw new Error(data.message || 'Failed to move item');
+                        }
+                        
+                        // Animate removal
+                        productRow.classList.add('fade-out');
+                        setTimeout(() => {
+                            productRow.remove();
+                            if (document.querySelectorAll('tbody tr').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                        
+                        showAlert('success', 'Moved!', 'Item saved to wishlist');
+                        
+                    } catch (error) {
+                        console.error('Save error:', error);
+                        showAlert('error', 'Error', error.message);
+                    } finally {
+                        this.disabled = false;
+                        this.innerHTML = '<i class="far fa-bookmark"></i>';
+                    }
+                }
+            });
+        });
+    };
+    
+    // Responsive Sidebar
+    const setupResponsiveSidebar = () => {
+        const adjustSidebar = () => {
+            const sidebar = document.querySelector('.col-lg-4 .card');
+            if (sidebar && window.innerWidth >= 992) {
+                const headerHeight = document.querySelector('.cart-header')?.offsetHeight || 0;
+                const windowHeight = window.innerHeight;
+                sidebar.style.maxHeight = `${windowHeight - headerHeight - 40}px`;
+            }
+        };
+        
+        adjustSidebar();
+        window.addEventListener('resize', adjustSidebar);
+    };
+    
+    // Initialize Everything
+    initRazorpay();
+    setupQuantityControls();
+    setupRemoveItem();
+    setupSaveForLater();
+    setupResponsiveSidebar();
+});
+</script>
+{% endblock %}

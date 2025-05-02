@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Seller Orders - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Your Orders</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if orders %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Product</th>
+                            <th>Buyer</th>
+                            <th>Date</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Shipping Address</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>
+                                <a href="{% url 'product_detail' order.product_id %}">
+                                    {{ order.proname }}
+                                </a>
+                            </td>
+                            <td>
+                                {% with order.buyer_id|stringformat:"s" as buyer_id_str %}
+                                <a href="{% url 'view_profile' buyer_id_str %}">
+                                    User #{{ order.buyer_id }}
+                                </a>
+                                {% endwith %}
+                            </td>
+                            <td>{{ order.order_date|date:"M d, Y" }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>
+                                {% if order.currency == 'USD' %}
+                                    ${{ order.total_price|floatformat:2 }}
+                                    (₹{{ order.total_price_inr|floatformat:2 }})
+                                {% else %}
+                                    ₹{{ order.total_price|floatformat:2 }}
+                                {% endif %}
+                            </td>
+                            <td>{{ order.shipping_address|truncatechars:30 }}</td>
+                            <td>{{ order.payment_method }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if order.status == 'Pending' %}bg-warning
+                                    {% elif order.status == 'Shipped' %}bg-info
+                                    {% elif order.status == 'Delivered' %}bg-success
+                                    {% elif order.status == 'Cancelled' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ order.status|default:"Processing" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" 
+                                        data-bs-toggle="modal" data-bs-target="#orderModal{{ order.id }}">
+                                        View
+                                    </button>
+                                    {% if order.status != 'Delivered' and order.status != 'Cancelled' %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                                            id="statusDropdown{{ order.id }}" data-bs-toggle="dropdown" 
+                                            aria-expanded="false">
+                                            Update
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="statusDropdown{{ order.id }}">
+                                            <li>
+                                                <form method="post" action="{% url 'update_order_status' order.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="Processing">
+                                                    <button type="submit" class="dropdown-item">Processing</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" action="{% url 'update_order_status' order.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="Shipped">
+                                                    <button type="submit" class="dropdown-item">Shipped</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" action="{% url 'update_order_status' order.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="Delivered">
+                                                    <button type="submit" class="dropdown-item">Delivered</button>
+                                                </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="post" action="{% url 'update_order_status' order.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="status" value="Cancelled">
+                                                    <button type="submit" class="dropdown-item text-danger">Cancel</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Order Details Modal -->
+                        <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1" 
+                            aria-labelledby="orderModalLabel{{ order.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="orderModalLabel{{ order.id }}">
+                                            Order #{{ order.id }} Details
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Product Information</h6>
+                                                <p>
+                                                    <strong>Name:</strong> {{ order.proname }}<br>
+                                                    <strong>Price:</strong> 
+                                                    {% if order.currency == 'USD' %}
+                                                        ${{ order.total_price|floatformat:2 }} (₹{{ order.total_price_inr|floatformat:2 }})
+                                                    {% else %}
+                                                        ₹{{ order.total_price|floatformat:2 }}
+                                                    {% endif %}
+                                                    <br>
+                                                    <strong>Quantity:</strong> {{ order.quantity }}<br>
+                                                    <strong>Subtotal:</strong> 
+                                                    {% if order.currency == 'USD' %}
+                                                        ${{ order.total_price|floatformat:2 }} (₹{{ order.total_price_inr|floatformat:2 }})
+                                                    {% else %}
+                                                        ₹{{ order.total_price|floatformat:2 }}
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Buyer Information</h6>
+                                                <p>
+                                                    <strong>Buyer ID:</strong> {{ order.buyer_id }}<br>
+                                                    <strong>Shipping Address:</strong><br>
+                                                    {{ order.shipping_address|linebreaks }}<br>
+                                                    <strong>Payment Method:</strong> {{ order.payment_method }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-12">
+                                                <h6>Order Timeline</h6>
+                                                <div class="timeline">
+                                                    <div class="timeline-item {% if order.status == 'Processing' %}active{% endif %}">
+                                                        <div class="timeline-point"></div>
+                                                        <div class="timeline-content">
+                                                            <p class="mb-0">Order Placed</p>
+                                                            <small class="text-muted">{{ order.order_date|date:"M d, Y H:i" }}</small>
+                                                        </div>
+                                                    </div>
+                                                    {% if order.status == 'Shipped' or order.status == 'Delivered' %}
+                                                    <div class="timeline-item {% if order.status == 'Shipped' %}active{% endif %}">
+                                                        <div class="timeline-point"></div>
+                                                        <div class="timeline-content">
+                                                            <p class="mb-0">Shipped</p>
+                                                            <small class="text-muted">
+                                                                {% if order.shipped_date %}
+                                                                    {{ order.shipped_date|date:"M d, Y H:i" }}
+                                                                {% else %}
+                                                                    Not shipped yet
+                                                                {% endif %}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if order.status == 'Delivered' %}
+                                                    <div class="timeline-item active">
+                                                        <div class="timeline-point"></div>
+                                                        <div class="timeline-content">
+                                                            <p class="mb-0">Delivered</p>
+                                                            <small class="text-muted">
+                                                                {% if order.delivered_date %}
+                                                                    {{ order.delivered_date|date:"M d, Y H:i" }}
+                                                                {% else %}
+                                                                    Not delivered yet
+                                                                {% endif %}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <a href="{% url 'seller_dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in orders.paginator.page_range %}
+                        {% if orders.number == num %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <img src="{% static 'images/empty-orders.svg' %}" alt="No orders" class="img-fluid mb-4" style="max-height: 200px;">
+                <h4 class="mb-3">No Orders Yet</h4>
+                <p class="text-muted">You haven't received any orders for your products.</p>
+                <a href="{% url 'seller_dashboard' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-2"></i>Add More Products
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 1rem;
+    }
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+        border-left: 1px solid #dee2e6;
+    }
+    .timeline-item:last-child {
+        border-left: 0;
+    }
+    .timeline-point {
+        position: absolute;
+        left: -0.5rem;
+        top: 0;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background-color: #adb5bd;
+    }
+    .timeline-item.active .timeline-point {
+        background-color: #0d6efd;
+    }
+    .timeline-content {
+        padding-left: 1.5rem;
+    }
+</style>
+{% endblock %}

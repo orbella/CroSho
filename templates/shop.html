@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shop - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Simple Hero Section -->
+    <div class="bg-light rounded-4 p-4 mb-4 text-center">
+        <h1 class="h3 fw-bold mb-2">Handmade Crochet Collection</h1>
+        <p class="text-muted">Beautiful handmade items crafted with care</p>
+    </div>
+
+    <!-- Basic Filter Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search products..." id="searchInput">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" id="sortSelect">
+                <option value="newest">Sort by: Newest</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row g-3">
+        {% for product in products %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card h-100">
+                <a href="{% url 'product_detail' product.id %}">
+                    <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                         class="card-img-top" 
+                         alt="{{ product.proname }}"
+                         style="height: 200px; object-fit: cover;">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.proname }}</h5>
+                    <p class="card-text text-muted small mb-2">
+                        {{ product.prodescription|truncatechars:60 }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary">
+                            {% if product.currency == 'USD' %}${% else %}₹{% endif %}{{ product.price }}
+                        </span>
+                        {% if product.stitch_type %}
+                        <span class="badge bg-light text-dark">
+                            {{ product.stitch_type|title }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    {% if user.is_authenticated and user_type == 'buyer' %}
+                    <form action="{% url 'add_to_cart' product.id %}" method="post" class="d-grid">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No products found</p>
+            <a href="{% url 'shop' %}" class="btn btn-outline-primary">Browse All</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Simple Pagination -->
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple search functionality
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            window.location.href = '?search=' + this.value;
+        }
+    });
+
+    // Simple sort functionality
+    document.getElementById('sortSelect').addEventListener('change', function() {
+        let sortValue = 'date_desc'; // default
+        if (this.value === 'price-low') sortValue = 'price_asc';
+        if (this.value === 'price-high') sortValue = 'price_desc';
+        window.location.href = '?sort=' + sortValue;
+    });
+</script>
+{% endblock %}

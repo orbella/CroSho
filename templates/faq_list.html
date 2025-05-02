@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Frequently Asked Questions</h2>
+
+<div class="faq-section">
+    {% for faq in faqs %}
+        <div class="faq-item">
+            <h5>{{ faq.question }}</h5>
+            <p>{{ faq.answer }}</p>
+            <hr>
+        </div>
+    {% empty %}
+        <p>No FAQs available yet.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

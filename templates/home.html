@@ -1,0 +1,931 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function addToCart(productId) {
+        fetch(`/add-to-cart/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ quantity: 1 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Added!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: 'Oops!',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong!',
+                icon: 'error'
+            });
+            console.error('Error:', error);
+        });
+    }
+
+    function toggleWishlist(productId, button) {
+        fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Toggle heart icon
+                if (data.action === 'added') {
+                    button.classList.remove('bi-heart');
+                    button.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    button.classList.remove('bi-heart-fill', 'text-danger');
+                    button.classList.add('bi-heart');
+                }
+                Swal.fire({
+                    title: data.action === 'added' ? 'Added!' : 'Removed!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: 'Oops!',
+                    text: data.message,
+                    icon: 'error'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error',
+                text: 'Something went wrong!',
+                icon: 'error'
+            });
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        document.getElementById('theme-toggle').innerHTML = '<i class="bi bi-sun-fill"></i>';
+    } else {
+        document.documentElement.setAttribute('data-bs-theme', 'light');
+        document.getElementById('theme-toggle').innerHTML = '<i class="bi bi-moon-fill"></i>';
+    }
+
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            this.innerHTML = '<i class="bi bi-moon-fill"></i>';
+        } else {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            this.innerHTML = '<i class="bi bi-sun-fill"></i>';
+        }
+    });
+
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Theme Toggle Button -->
+<div class="position-fixed end-0 bottom-0 m-3 z-3">
+    <button id="theme-toggle" class="btn btn-primary rounded-circle p-2 shadow" 
+            title="Toggle theme" aria-label="Toggle theme">
+        <i class="bi"></i>
+    </button>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section py-5 bg-gradient-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4" style="font-family: 'Playfair Display', serif;">Handmade Crochet Treasures</h1>
+                <p class="lead mb-4" style="font-family: 'Quicksand', sans-serif;">Discover unique, artisan-crafted crochet items made with various stitch techniques.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'shop' %}" class="btn btn-light btn-lg px-4 fw-bold">Shop Now</a>
+                    <a href="{% url 'tutorials' %}" class="btn btn-outline-light btn-lg px-4">Learn Stitches</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/home1.jpg' %}" alt="Crochet products" class="img-fluid rounded-4 shadow-lg" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold display-5" style="font-family: 'Playfair Display', serif;">Featured Products</h2>
+            <a href="{% url 'shop' %}" class="btn btn-outline-primary btn-lg">View All</a>
+        </div>
+        
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm product-card position-relative" 
+                     style="border-radius: 12px; overflow: hidden; border: 1px solid #F8F1E9;">
+                    
+                    <!-- Crochet-themed Ribbon for Stitch Type -->
+                    {% if product.stitch_type %}
+                    <div class="position-absolute top-0 end-0">
+                        <div class="stitch-ribbon" data-bs-toggle="tooltip" title="{{ product.stitch_type|title }} stitch">
+                            <i class="fas fa-stitch me-1"></i>
+                            {{ product.stitch_type|title }}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Wishlist Heart (Yarn-themed) -->
+                    {% if user.is_authenticated and user.user_type == 'buyer' %}
+                    <button type="button" class="btn wishlist-heart position-absolute top-0 start-0 m-2 z-2"
+                            onclick="toggleWishlist({{ product.id }}, this)">
+                        <div class="yarn-circle {% if product.wishlist_status %}active{% endif %}">
+                            <i class="fas fa-heart {% if product.wishlist_status %}text-danger{% else %}text-white{% endif %}"></i>
+                        </div>
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Product Image with Yarn Overlay -->
+                    <div class="position-relative overflow-hidden" style="height: 250px;">
+                        <img src="{{ MEDIA_URL }}{{ product.image }}" class="w-100 h-100 object-fit-cover" alt="{{ product.proname }}" loading="lazy">
+                        
+                        <!-- Quick Actions Overlay (Yarn Texture) -->
+                        <div class="yarn-overlay d-flex flex-column justify-content-center align-items-center">
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-light rounded-pill mb-2 px-3">
+                                <i class="fas fa-eye me-1"></i> Quick View
+                            </a>
+                            {% if user.is_authenticated and user.user_type == 'buyer' %}
+                            <button class="btn btn-sm btn-primary rounded-pill px-3"
+                                    onclick="addToCart({{ product.id }}, event)">
+                                <i class="fas fa-shopping-bag me-1"></i> Add to Bag
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="card-body" style="background-color: #FFF9F5;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-light text-dark rounded-pill">
+                                {{ product.category|default:"Crochet" }}
+                            </span>
+                            <span class="fw-bold" style="color: #5E807F;">
+                                ₹{{ product.price|floatformat:2 }}
+                                <small class="text-muted d-block">${{ product.price|floatformat:2|divide:83 }}</small>
+                            </span>
+                        </div>
+                        <h5 class="card-title mb-2" style="font-family: 'Playfair Display', serif; color: #5E807F;">
+                            {{ product.proname }}
+                        </h5>
+                        <p class="card-text text-muted small mb-3">{{ product.prodescription|truncatechars:80 }}</p>
+                        
+                        <!-- Rating with Yarn Dots -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="yarn-rating me-2">
+                                {% for i in "12345" %}
+                                <span class="yarn-dot {% if forloop.counter <= 4 %}active{% endif %}"></span>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ product.review_count }})</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer with Add to Cart (for buyers only) -->
+                    <div class="card-footer bg-transparent border-top-0">
+                        {% if user.is_authenticated and user.user_type == 'buyer' %}
+                        <button class="btn w-100 rounded-pill py-2"
+                                style="background-color: #5E807F; color: white;"
+                                onclick="addToCart({{ product.id }}, event)">
+                            <i class="fas fa-shopping-bag me-1"></i> Add to Cart
+                        </button>
+                        {% else %}
+                        <div class="text-center py-1">
+                            <small class="text-muted">
+                                {% if not user.is_authenticated %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="text-primary">Login</a> as buyer to purchase
+                                {% else %}
+                                Seller accounts cannot make purchases
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <img src="{% static 'images/empty-yarn.png' %}" width="120" class="mb-3 opacity-50">
+                <h4 class="text-muted" style="font-family: 'Playfair Display', serif;">No patterns available</h4>
+                <p class="text-muted">Our artisans are crafting new creations!</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <script>
+            // Enhanced wishlist function with validation
+            function toggleWishlist(productId, element) {
+                {% if not user.is_authenticated %}
+                window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                return;
+                {% endif %}
+                
+                {% if user.user_type != 'buyer' %}
+                showToast("Only buyers can add to wishlist", 'error');
+                return;
+                {% endif %}
+        
+                const heart = element.querySelector('.fa-heart');
+                const isActive = heart.classList.contains('text-danger');
+                
+                // Immediate visual feedback
+                element.querySelector('.yarn-circle').classList.toggle('active');
+                heart.classList.toggle('text-danger');
+                heart.classList.toggle('text-white');
+                
+                // AJAX call
+                fetch(`/wishlist/toggle/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        // Revert if failed
+                        element.querySelector('.yarn-circle').classList.toggle('active');
+                        heart.classList.toggle('text-danger');
+                        heart.classList.toggle('text-white');
+                        showToast(data.message || 'Error updating wishlist', 'error');
+                    } else {
+                        showToast(isActive ? 'Removed from wishlist' : 'Added to wishlist', 'success');
+                    }
+                });
+            }
+        
+            // Add to cart with validation
+            function addToCart(productId, event) {
+                event.stopPropagation();
+                
+                {% if not user.is_authenticated %}
+                window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                return;
+                {% endif %}
+                
+                {% if user.user_type != 'buyer' %}
+                showToast("Only buyers can add to cart", 'error');
+                return;
+                {% endif %}
+        
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                
+                // Visual feedback
+                button.innerHTML = '<i class="fas fa-check me-1"></i> Added';
+                button.style.backgroundColor = '#28a745';
+                
+                fetch(`/cart/add/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update cart counter
+                        const counter = document.querySelector('.cart-counter');
+                        if (counter) {
+                            counter.textContent = data.cart_count;
+                            counter.classList.add('animate-bounce');
+                            setTimeout(() => counter.classList.remove('animate-bounce'), 1000);
+                        }
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.style.backgroundColor = '#5E807F';
+                        }, 2000);
+                    } else {
+                        button.innerHTML = originalText;
+                        button.style.backgroundColor = '#5E807F';
+                        showToast(data.message || 'Error adding to cart', 'error');
+                    }
+                });
+            }
+        </script>
+        
+        <style>
+            /* Crochet-themed styles */
+            .product-card {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                background-color: #FFF9F5;
+            }
+            
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(94, 128, 127, 0.15);
+            }
+            
+            .stitch-ribbon {
+                background-color: #D4A5A5;
+                color: white;
+                padding: 4px 10px;
+                font-size: 0.75rem;
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+                padding-left: 15px;
+            }
+            
+            .wishlist-heart {
+                padding: 0;
+                border: none;
+                background: transparent;
+            }
+            
+            .yarn-circle {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background-color: #5E807F;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            }
+            
+            .yarn-circle.active {
+                background-color: #F8F1E9;
+                border: 2px solid #D4A5A5;
+            }
+            
+            .yarn-circle i {
+                font-size: 0.9rem;
+                transition: all 0.3s ease;
+            }
+            
+            .yarn-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(94, 128, 127, 0.9);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .product-card:hover .yarn-overlay {
+                opacity: 1;
+            }
+            
+            .yarn-rating {
+                display: flex;
+                gap: 3px;
+            }
+            
+            .yarn-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: #F8F1E9;
+                border: 1px solid #A3D4D5;
+            }
+            
+            .yarn-dot.active {
+                background-color: #D4A5A5;
+                border-color: #5E807F;
+            }
+            
+            .animate-bounce {
+                animation: bounce 0.5s;
+            }
+            
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); }
+            }
+        </style>
+</section>
+
+<!-- Stitch Types Section -->
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <h2 class="fw-bold text-center display-5 mb-5" style="font-family: 'Playfair Display', serif;">Explore Stitch Types</h2>
+        <div class="row g-4">
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}?stitch=granny" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-grid-3x3-gap-fill fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Granny</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}?stitch=amigurumi" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-heart-fill fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Amigurumi</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}?stitch=lace" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 text-warning rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-flower1 fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Lace</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}?stitch=cable" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-braces fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Cable</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}?stitch=tunisian" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-columns-gap fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Tunisian</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-6">
+                <a href="{% url 'shop' %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect text-center p-3">
+                        <div class="icon-wrapper bg-secondary bg-opacity-10 text-secondary rounded-circle p-3 mb-3 mx-auto">
+                            <i class="bi bi-collection-fill fs-4"></i>
+                        </div>
+                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">View All</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Unique Selling Points -->
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <h2 class="fw-bold text-center display-5 mb-5" style="font-family: 'Playfair Display', serif;">Why Choose CroSho?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 bg-body rounded-4 shadow-sm h-100 text-center">
+                    <div class="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 60px; height: 60px;">
+                        <i class="bi bi-hand-thumbs-up fs-3"></i>
+                    </div>
+                    <h4 class="fw-bold" style="font-family: 'Quicksand', sans-serif;">Ethically Made</h4>
+                    <p class="text-muted" style="font-family: 'Quicksand', sans-serif;">Each item is crafted with sustainable materials and fair labor practices, supporting artisan communities worldwide.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-body rounded-4 shadow-sm h-100 text-center">
+                    <div class="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 60px; height: 60px;">
+                        <i class="bi bi-heart fs-3"></i>
+                    </div>
+                    <h4 class="fw-bold" style="font-family: 'Quicksand', sans-serif;">One-of-a-Kind</h4>
+                    <p class="text-muted" style="font-family: 'Quicksand', sans-serif;">Unique designs you won't find anywhere else - each piece tells a story of the artisan who made it.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-body rounded-4 shadow-sm h-100 text-center">
+                    <div class="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 60px; height: 60px;">
+                        <i class="bi bi-stars fs-3"></i>
+                    </div>
+                    <h4 class="fw-bold" style="font-family: 'Quicksand', sans-serif;">Custom Orders</h4>
+                    <p class="text-muted" style="font-family: 'Quicksand', sans-serif;">Work directly with artisans to create your perfect custom crochet item, tailored to your preferences.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="fw-bold text-center display-5 mb-5" style="font-family: 'Playfair Display', serif;">Explore Our Collections</h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'shop' %}?category=home" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect category-card">
+                        <img src="{% static 'images/home_decor.jpg' %}" class="card-img-top" alt="Home Decor" loading="lazy" style="height: 200px; object-fit: cover;">
+                        <div class="card-body text-center bg-primary text-white rounded-bottom">
+                            <h5 class="card-title mb-0" style="font-family: 'Quicksand', sans-serif;">Home Decor</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'shop' %}?category=clothing" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect category-card">
+                        <img src="{% static 'images/clothing.jpg' %}" class="card-img-top" alt="Clothing" loading="lazy" style="height: 200px; object-fit: cover;">
+                        <div class="card-body text-center bg-success text-white rounded-bottom">
+                            <h5 class="card-title mb-0" style="font-family: 'Quicksand', sans-serif;">Clothing</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'shop' %}?category=accessories" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect category-card">
+                        <img src="{% static 'images/accessories.jpg' %}" class="card-img-top" alt="Accessories" loading="lazy" style="height: 200px; object-fit: cover;">
+                        <div class="card-body text-center bg-warning text-dark rounded-bottom">
+                            <h5 class="card-title mb-0" style="font-family: 'Quicksand', sans-serif;">Accessories</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'shop' %}?category=toys" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm h-100 hover-effect category-card">
+                        <img src="{% static 'images/toys.jpg' %}" class="card-img-top" alt="Toys" loading="lazy" style="height: 200px; object-fit: cover;">
+                        <div class="card-body text-center bg-info text-white rounded-bottom">
+                            <h5 class="card-title mb-0" style="font-family: 'Quicksand', sans-serif;">Toys</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Carousel -->
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <h2 class="fw-bold text-center display-5 mb-5" style="font-family: 'Playfair Display', serif;">What Our Community Says</h2>
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 800px;">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="mb-4 text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <p class="lead fst-italic mb-4" style="font-family: 'Quicksand', sans-serif;">"The quality of this crochet blanket exceeded my expectations. It's become my favorite cozy companion on chilly evenings! The artisan even included a handwritten note with care instructions."</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'images/cus2.jpg' %}" class="rounded-circle me-3" width="60" height="60" alt="Customer" loading="lazy">
+                                    <div>
+                                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Sarah Johnson</h6>
+                                        <small class="text-muted">Happy Customer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 800px;">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="mb-4 text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <p class="lead fst-italic mb-4" style="font-family: 'Quicksand', sans-serif;">"I ordered a custom crochet doll of my dog, and the artisan captured every detail perfectly. The communication throughout the process was excellent. Truly a work of art!"</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'images/cus3.jpg' %}" class="rounded-circle me-3" width="60" height="60" alt="Customer" loading="lazy">
+                                    <div>
+                                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Michael Chen</h6>
+                                        <small class="text-muted">Custom Order</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm mx-auto" style="max-width: 800px;">
+                            <div class="card-body p-4 p-md-5">
+                                <div class="mb-4 text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                </div>
+                                <p class="lead fst-italic mb-4" style="font-family: 'Quicksand', sans-serif;">"The shipping was faster than expected, and the packaging was so thoughtful. My scarf arrived with a handwritten note and a small sample of matching yarn for repairs!"</p>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% static 'images/cus1.jpg' %}" class="rounded-circle me-3" width="60" height="60" alt="Customer" loading="lazy">
+                                    <div>
+                                        <h6 class="mb-0" style="font-family: 'Quicksand', sans-serif;">Emma Rodriguez</h6>
+                                        <small class="text-muted">Repeat Customer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-primary rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-primary rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4 display-5" style="font-family: 'Playfair Display', serif;">Ready to Start Your Crochet Journey?</h2>
+        <p class="lead mb-4" style="font-family: 'Quicksand', sans-serif;">Join our community of crochet enthusiasts and artisans today.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4 fw-bold">Sign Up Free</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">Login</a>
+            {% else %}
+            <a href="{% if user_type == 'seller' %}{% url 'seller_dashboard' %}{% else %}{% url 'buyer_dashboard' %}{% endif %}" class="btn btn-light btn-lg px-4 fw-bold">My Dashboard</a>
+            <a href="{% url 'community' %}" class="btn btn-outline-light btn-lg px-4">Join Community</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Latest from Blog -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold display-5" style="font-family: 'Playfair Display', serif;">Crochet Tips & Stories</h2>
+            <a href="#" class="btn btn-outline-primary btn-lg">View All Articles</a>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <img src="{% static 'images/begnner.jpg' %}" class="card-img-top rounded-top" alt="Blog post" loading="lazy" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <span class="badge bg-primary mb-2">Tutorial</span>
+                        <h5 class="card-title" style="font-family: 'Quicksand', sans-serif;">5 Essential Crochet Stitches for Beginners</h5>
+                        <p class="card-text text-muted" style="font-family: 'Quicksand', sans-serif;">Master these basic stitches to create countless crochet projects with confidence.</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="#" class="btn btn-sm btn-primary rounded-pill px-3">Read More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <img src="{% static 'images/eco-friendly.jpg' %}" class="card-img-top rounded-top" alt="Blog post" loading="lazy" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <span class="badge bg-success mb-2">Sustainability</span>
+                        <h5 class="card-title" style="font-family: 'Quicksand', sans-serif;">Eco-Friendly Yarn Choices for Conscious Crafters</h5>
+                        <p class="card-text text-muted" style="font-family: 'Quicksand', sans-serif;">Discover sustainable yarn options that are gentle on the planet without compromising quality.</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="#" class="btn btn-sm btn-primary rounded-pill px-3">Read More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <img src="{% static 'images/artisan.jpg' %}" class="card-img-top rounded-top" alt="Blog post" loading="lazy" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <span class="badge bg-warning text-dark mb-2">Artisan Story</span>
+                        <h5 class="card-title" style="font-family: 'Quicksand', sans-serif;">Meet Priya: From Hobby to Thriving Crochet Business</h5>
+                        <p class="card-text text-muted" style="font-family: 'Quicksand', sans-serif;">How one artisan turned her passion for crochet into a successful small business.</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="#" class="btn btn-sm btn-primary rounded-pill px-3">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-5 bg-light-subtle">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="fw-bold display-5 mb-3" style="font-family: 'Playfair Display', serif;">Stay in the Loop</h2>
+                <p class="lead mb-4" style="font-family: 'Quicksand', sans-serif;">Subscribe to our newsletter for exclusive patterns, artisan stories, and special offers.</p>
+                <form method="post" action="{% url 'newsletter_subscribe' %}" class="row g-2 justify-content-center">
+                    {% csrf_token %}
+                    <div class="col-md-8">
+                        <input type="email" name="email" class="form-control form-control-lg" placeholder="Your email address" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Subscribe</button>
+                    </div>
+                </form>
+                <p class="small text-muted mt-3" style="font-family: 'Quicksand', sans-serif;">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Quicksand:wght@400;600&display=swap');
+
+    :root {
+        --bs-primary: #8e6c88;
+        --bs-primary-rgb: 142, 108, 136;
+        --bs-secondary: #6b8e23;
+        --bs-success: #5a8f7b;
+        --bs-info: #7ebdc2;
+        --bs-warning: #f4a261;
+        --bs-danger: #e56b6f;
+        --bs-body-font-family: 'Quicksand', sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+        font-family: 'Playfair Display', serif;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #6d4c41 100%);
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .product-overlay {
+        position: absolute;
+        bottom: -100%;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        padding: 1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+    }
+
+    .product-card:hover .product-overlay {
+        bottom: 0;
+    }
+
+    .category-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .category-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .hover-effect {
+        transition: all 0.3s ease;
+    }
+
+    .hover-effect:hover {
+        transform: translateY(-5px);
+    }
+
+    .icon-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .icon-wrapper:hover {
+        transform: rotate(15deg) scale(1.1);
+    }
+
+    [data-bs-theme="dark"] {
+        --bs-body-bg: #1a1a2e;
+        --bs-body-color: #f8f9fa;
+        --bs-light: #16213e;
+        --bs-dark: #f8f9fa;
+        --bs-primary: #b38ead;
+        --bs-secondary: #8aa854;
+        --bs-text-muted: #adb5bd;
+    }
+
+    [data-bs-theme="dark"] .bg-light-subtle {
+        background-color: rgba(30, 30, 46, 0.9) !important;
+    }
+
+    [data-bs-theme="dark"] .card {
+        background-color: #16213e;
+        border-color: #0f3460;
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .text-muted {
+        color: #ced4da !important;
+    }
+
+    [data-bs-theme="dark"] .card-body {
+        color: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] .card-text {
+        color: #dee2e6 !important;
+    }
+
+    [data-bs-theme="dark"] .bg-body {
+        background-color: #16213e !important;
+    }
+
+    [data-bs-theme="dark"] .btn-outline-primary {
+        --bs-btn-color: #b38ead;
+        --bs-btn-border-color: #b38ead;
+        --bs-btn-hover-bg: #8e6c88;
+        --bs-btn-hover-border-color: #8e6c88;
+        --bs-btn-active-bg: #8e6c88;
+        --bs-btn-active-border-color: #8e6c88;
+    }
+
+    [data-bs-theme="dark"] .btn-primary {
+        --bs-btn-bg: #8e6c88;
+        --bs-btn-border-color: #8e6c88;
+        --bs-btn-hover-bg: #9d7a97;
+        --bs-btn-hover-border-color: #9d7a97;
+        --bs-btn-active-bg: #9d7a97;
+        --bs-btn-active-border-color: #9d7a97;
+    }
+
+    [data-bs-theme="dark"] .text-dark {
+        color: #f8f9fa !important;
+    }
+
+    [data-bs-theme="dark"] .badge.bg-info {
+        background-color: #5bc0de !important;
+        color: #000 !important;
+    }
+
+    [data-bs-theme="dark"] .badge.bg-warning {
+        background-color: #f0ad4e !important;
+        color: #000 !important;
+    }
+</style>
+{% endblock %}

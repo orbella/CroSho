@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}The CroSho Stitch Journal - Crochet Blog{% endblock %}
+
+{% block content %}
+
+<!-- Video Background -->
+<div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; overflow: hidden;">
+    <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-crochet-work-11739-large.mp4" type="video/mp4">
+    </video>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(248, 241, 233, 0.85);"></div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <img src="{% static 'images/yarn-ball.jpg' %}" width="80" class="mb-3">
+                <h1 class="display-4 mb-3" style="font-family: 'Playfair Display', serif; color: #5E807F;">
+                    The CroSho Stitch Journal
+                </h1>
+                <p class="lead" style="color: #D4A5A5;">
+                    <i class="fas fa-quote-left me-2"></i> 
+                    Where every yarn tells a story and every stitch holds magic
+                    <i class="fas fa-quote-right ms-2"></i>
+                </p>
+                <div class="crochet-divider">
+                    <i class="fas fa-heart" style="color: #D4A5A5;"></i>
+                </div>
+            </div>
+            
+            <!-- Featured Story -->
+            <div class="card mb-5 border-0 shadow-lg overflow-hidden" style="border-radius: 12px;">
+                <div class="position-relative">
+                    {% if featured_post.image %}
+                    {% comment %} <img src="{% get_media_prefix %}{{ featured_post.image }}" class="card-img-top" 
+                         style="height: 400px; object-fit: cover;" alt="{{ featured_post.title }}">
+                    {% else %} {% endcomment %}
+                    <img src="{% static 'images/blog.jpg' %}" class="card-img-top" 
+                         style="height: 400px; object-fit: cover;" alt="Featured crochet story">
+                    {% endif %}
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4" 
+                         style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
+                        <span class="badge rounded-pill mb-2" 
+                              style="background-color: #D4A5A5; color: white; padding: 5px 12px;">
+                            Featured Story
+                        </span>
+                        <h2 class="text-white mb-1">{{ featured_post.title }}</h2>
+                        <small class="text-white-50">
+                            <i class="far fa-calendar me-1"></i> {{ featured_post.created_at|date:"F d, Y" }} 
+                            {% comment %} | By {{ featured_post.author.get_full_name|default:featured_post.author.username }} {% endcomment %}
+                        </small>
+                    </div>
+                </div>
+                <div class="card-body p-4" style="background-color: rgba(255, 255, 255, 0.95);">
+                    <div class="drop-cap">
+                        <p class="card-text">{{ featured_post.excerpt }}</p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        {% if featured_post.id %}
+                        <a href="{% url 'blog_post' featured_post.id %}" 
+                           class="btn btn-outline-primary rounded-pill px-4">
+                            Continue Reading <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                        {% endif %}
+                        <div>
+                            <span class="me-3 text-muted">
+                                <i class="fas fa-comment-dots me-1"></i> {{ featured_post.comment_count }} Comments
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-stopwatch me-1"></i> 5 min read
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stitch of the Month -->
+            <div class="card mb-5 border-0 shadow-sm" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="{% static 'images/stitch.jpg' %}" width="50">
+                        </div>
+                        <div>
+                            <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                                Stitch of the Month: <span class="text-primary">Larksfoot Stitch</span>
+                            </h3>
+                            <small class="text-muted">Master this vintage stitch with our tutorial</small>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <img src="{% static 'images/larsfoot-stitch.jpg' %}" class="img-fluid rounded" alt="Larksfoot stitch">
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-3">The Larksfoot stitch creates a beautiful textured pattern resembling birds' footprints, perfect for blankets and scarves.</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #D4A5A5;"></i> Works up quickly</li>
+                                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #D4A5A5;"></i> Great for variegated yarns</li>
+                                <li class="mb-2"><i class="fas fa-check-circle me-2" style="color: #D4A5A5;"></i> Creates wonderful drape</li>
+                            </ul>
+                            <a href="#" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="fas fa-video me-1"></i> Watch Tutorial
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Blog Posts Grid -->
+            <div class="row g-4 mb-5">
+                {% for post in blog_posts %}
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <div class="position-relative">
+                            {% if post.image %}
+                            {% comment %} <img src="{% get_media_prefix %}{{ post.image }}" class="card-img-top" 
+                                 style="height: 200px; object-fit: cover;" alt="{{ post.title }}">
+                            {% else %} {% endcomment %}
+                            <img src="{% static 'images/blog.jpg' %}" class="card-img-top" 
+                                 style="height: 200px; object-fit: cover;" alt="{{ post.title }}">
+                            {% endif %}
+                            <span class="position-absolute top-0 start-0 m-2 badge" 
+                                  style="background-color: #5E807F; color: white;">
+                                {{ post.category }}
+                            </span>
+                        </div>
+                        <div class="card-body p-4" style="background-color: rgba(255, 255, 255, 0.95);">
+                            <small class="text-muted d-block mb-2">
+                                <i class="far fa-calendar me-1"></i> {{ post.created_at|date:"M d, Y" }}
+                            </small>
+                            <h3 class="h5 card-title mb-3" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                                {{ post.title }}
+                            </h3>
+                            <p class="card-text text-muted mb-3">{{ post.excerpt|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'blog_post' post.id %}" 
+                                   class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Read Story
+                                </a>
+                                <small class="text-muted">
+                                    <i class="far fa-comment me-1"></i> {{ post.comment_count }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <img src="{% static 'images/empty-basket.jpg' %}" width="120" class="mb-3 opacity-75">
+                    <h4 style="color: #5E807F; font-family: 'Playfair Display', serif;">Our Blog Is Still Unfolding</h4>
+                    <p class="text-muted">Like a new skein of yarn, we're just getting started!</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if blog_posts.paginator.num_pages > 1 %}
+            <nav aria-label="Blog pagination" class="mb-5">
+                <ul class="pagination justify-content-center">
+                    {% if blog_posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link rounded-start-pill" 
+                           href="?page={{ blog_posts.previous_page_number }}" 
+                           style="border-color: #A3D4D5; color: #5E807F;">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in blog_posts.paginator.page_range %}
+                    <li class="page-item {% if num == blog_posts.number %}active{% endif %}">
+                        <a class="page-link" 
+                           href="?page={{ num }}" 
+                           style="border-color: #A3D4D5; color: #5E807F; 
+                                  {% if num == blog_posts.number %}background-color: #5E807F; border-color: #5E807F; color: white;{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if blog_posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link rounded-end-pill" 
+                           href="?page={{ blog_posts.next_page_number }}" 
+                           style="border-color: #A3D4D5; color: #5E807F;">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            <!-- Yarn Spotlight Section -->
+            <div class="card mb-5 border-0 shadow-sm" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <img src="{% static 'images/yarn-ball.jpg' %}" width="50">
+                        </div>
+                        <div>
+                            <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                                Yarn Spotlight: <span class="text-primary">Organic Cotton</span>
+                            </h3>
+                            <small class="text-muted">This month's recommended fiber</small>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <img src="{% static 'images/organic-cotton.jpg' %}" class="img-fluid rounded" alt="Organic cotton yarn">
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-3">Our artisan spotlight shines on this eco-friendly, soft organic cotton yarn perfect for summer projects.</p>
+                            <div class="yarn-details mb-3">
+                                <div class="d-flex mb-2">
+                                    <span class="me-3" style="min-width: 100px;"><strong>Weight:</strong></span>
+                                    <span>DK (Light Worsted)</span>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <span class="me-3" style="min-width: 100px;"><strong>Fiber:</strong></span>
+                                    <span>100% GOTS Certified Organic Cotton</span>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <span class="me-3" style="min-width: 100px;"><strong>Best For:</strong></span>
+                                    <span>Baby items, summer tops, market bags</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-primary rounded-pill px-3 me-2">
+                                <i class="fas fa-shopping-bag me-1"></i> Shop Now
+                            </a>
+                            <a href="#" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="fas fa-book me-1"></i> Pattern Ideas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- About Widget -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-body p-4 text-center">
+                    <img src="{% static 'images/yarn-ball.jpg' %}" width="80" class="mb-3">
+                    <h3 class="h5 mb-3" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        Welcome Stitchers!
+                    </h3>
+                    <p class="small text-muted mb-3">
+                        The CroSho Stitch Journal is your cozy corner for crochet inspiration, tutorials, and yarn love. 
+                        Founded in 2023 by a group of passionate hookers, we celebrate the art of crochet one stitch at a time.
+                    </p>
+                    <div class="crochet-divider-sm my-3">
+                        <i class="fas fa-heart" style="color: #D4A5A5; font-size: 0.8rem;"></i>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <a href="#" class="btn btn-sm rounded-pill me-2" 
+                           style="background-color: #5E807F; color: white; width: 40px; height: 40px;">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm rounded-pill me-2" 
+                           style="background-color: #5E807F; color: white; width: 40px; height: 40px;">
+                            <i class="fab fa-pinterest"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm rounded-pill" 
+                           style="background-color: #5E807F; color: white; width: 40px; height: 40px;">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Categories Widget -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-header border-0" style="background-color: transparent;">
+                    <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        <i class="fas fa-tags me-2"></i> Stitch Categories
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center text-decoration-none" 
+                               style="color: #5E807F;">
+                                <span>
+                                    <i class="fas fa-caret-right me-2" style="color: #D4A5A5;"></i> Amigurumi
+                                </span>
+                                <span class="badge rounded-pill" 
+                                      style="background-color: #F8F1E9; color: #5E807F; font-weight: normal;">
+                                    24
+                                </span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center text-decoration-none" 
+                               style="color: #5E807F;">
+                                <span>
+                                    <i class="fas fa-caret-right me-2" style="color: #D4A5A5;"></i> Home Decor
+                                </span>
+                                <span class="badge rounded-pill" 
+                                      style="background-color: #F8F1E9; color: #5E807F; font-weight: normal;">
+                                    18
+                                </span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center text-decoration-none" 
+                               style="color: #5E807F;">
+                                <span>
+                                    <i class="fas fa-caret-right me-2" style="color: #D4A5A5;"></i> Wearables
+                                </span>
+                                <span class="badge rounded-pill" 
+                                      style="background-color: #F8F1E9; color: #5E807F; font-weight: normal;">
+                                    32
+                                </span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center text-decoration-none" 
+                               style="color: #5E807F;">
+                                <span>
+                                    <i class="fas fa-caret-right me-2" style="color: #D4A5A5;"></i> Stitch Tutorials
+                                </span>
+                                <span class="badge rounded-pill" 
+                                      style="background-color: #F8F1E9; color: #5E807F; font-weight: normal;">
+                                    15
+                                </span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="d-flex justify-content-between align-items-center text-decoration-none" 
+                               style="color: #5E807F;">
+                                <span>
+                                    <i class="fas fa-caret-right me-2" style="color: #D4A5A5;"></i> Yarn Reviews
+                                </span>
+                                <span class="badge rounded-pill" 
+                                      style="background-color: #F8F1E9; color: #5E807F; font-weight: normal;">
+                                    9
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Popular Patterns -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-header border-0" style="background-color: transparent;">
+                    <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        <i class="fas fa-fire me-2"></i> Trending Patterns
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex mb-3">
+                        <img src="{% static 'images/pattern1.jpg' %}" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                        <div>
+                            <h4 class="h6 mb-1">
+                                <a href="#" class="text-decoration-none" style="color: #5E807F;">
+                                    Granny Square Cardigan
+                                </a>
+                            </h4>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-user me-1"></i> By YarnCraftMaya
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-heart me-1 text-danger"></i> 142 favorites
+                            </small>
+                        </div>
+                    </div>
+                    <hr class="my-2" style="border-color: rgba(163, 212, 213, 0.3);">
+                    <div class="d-flex mb-3">
+                        <img src="{% static 'images/pattern2.jpg' %}" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                        <div>
+                            <h4 class="h6 mb-1">
+                                <a href="#" class="text-decoration-none" style="color: #5E807F;">
+                                    Boho Market Bag
+                                </a>
+                            </h4>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-user me-1"></i> By StitchWithSara
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-heart me-1 text-danger"></i> 98 favorites
+                            </small>
+                        </div>
+                    </div>
+                    <hr class="my-2" style="border-color: rgba(163, 212, 213, 0.3);">
+                    <div class="d-flex">
+                        <img src="{% static 'images/pattern3.jpg' %}" class="rounded me-3" width="60" height="60" style="object-fit: cover;">
+                        <div>
+                            <h4 class="h6 mb-1">
+                                <a href="#" class="text-decoration-none" style="color: #5E807F;">
+                                    Cozy Cable Beanie
+                                </a>
+                            </h4>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-user me-1"></i> By HookedByHannah
+                            </small>
+                            <small class="text-muted">
+                                <i class="fas fa-heart me-1 text-danger"></i> 76 favorites
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Newsletter Widget -->
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-header border-0" style="background-color: transparent;">
+                    <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        <i class="fas fa-envelope me-2"></i> Stitch Letter
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="small text-muted mb-3">
+                        Join our weekly newsletter for free patterns, yarn tips, and exclusive discounts!
+                    </p>
+                    <form method="post" action="{% url 'newsletter_subscribe' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="email" class="form-control rounded-pill" 
+                                   placeholder="Your email" required 
+                                   style="border-color: #A3D4D5; background-color: #FFF9F5;">
+                        </div>
+                        <button type="submit" class="btn w-100 rounded-pill py-2" 
+                                style="background-color: #5E807F; color: white;">
+                            <i class="fas fa-paper-plane me-1"></i> Subscribe
+                        </button>
+                    </form>
+                    <small class="text-muted mt-2 d-block text-center">
+                        We never share your email. Unsubscribe anytime.
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Crochet Along (CAL) -->
+            <div class="card border-0 shadow-sm mt-4" style="border-radius: 12px; background-color: rgba(255, 255, 255, 0.95);">
+                <div class="card-header border-0" style="background-color: transparent;">
+                    <h3 class="h5 mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        <i class="fas fa-users me-2"></i> Current CAL
+                    </h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <img src="{% static 'images/yarn-ball.jpg.jpg' %}" class="img-fluid rounded mb-3" alt="Crochet Along Project">
+                    <h4 class="h6 mb-2" style="color: #5E807F;">Mystery Blanket 2024</h4>
+                    <p class="small text-muted mb-3">
+                        Join our community crochet along! Receive a new clue each week to reveal the final design.
+                    </p>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" style="width: 35%; background-color: #D4A5A5;" 
+                             aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted d-block mb-3">Week 3 of 8</small>
+                    <a href="#" class="btn btn-sm btn-primary rounded-pill px-3">
+                        <i class="fas fa-plus me-1"></i> Join CAL
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap');
+    
+    .crochet-divider {
+        position: relative;
+        height: 1px;
+        background-color: #A3D4D5;
+        margin: 1.5rem auto;
+        width: 100px;
+    }
+    .crochet-divider-sm {
+        position: relative;
+        height: 1px;
+        background-color: #A3D4D5;
+        margin: 1rem auto;
+        width: 60px;
+    }
+    .crochet-divider i,
+    .crochet-divider-sm i {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #FFF9F5;
+        padding: 0 10px;
+    }
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(94, 128, 127, 0.15) !important;
+    }
+    .drop-cap::first-letter {
+        float: left;
+        font-size: 3.5rem;
+        line-height: 0.8;
+        margin: 0.15em 0.1em 0 0;
+        color: #5E807F;
+        font-family: 'Playfair Display', serif;
+    }
+    .badge {
+        font-weight: normal;
+        letter-spacing: 0.5px;
+    }
+    .form-control:focus {
+        border-color: #5E807F;
+        box-shadow: 0 0 0 0.25rem rgba(94, 128, 127, 0.25);
+    }
+    .page-link:hover {
+        background-color: #F8F1E9;
+        color: #5E807F;
+    }
+    .yarn-details {
+        background-color: #F8F1E9;
+        border-radius: 8px;
+        padding: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Video mute toggle
+        const video = document.querySelector('video');
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyM') {
+                video.muted = !video.muted;
+                showToast(video.muted ? 'Sound muted' : 'Sound on');
+            }
+        });
+        
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+    
+    function showToast(message) {
+        // Implement your toast notification here
+        console.log(message);
+    }
+</script>
+{% endblock %}

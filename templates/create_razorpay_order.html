@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Complete Your Purchase | CroSho{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-container {
+        background-color: var(--card-bg);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        max-width: 600px;
+        margin: 40px auto;
+    }
+    
+    .payment-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .payment-details {
+        margin-bottom: 25px;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: var(--accent-color);
+    }
+    
+    .razorpay-btn {
+        background-color: #5266CC;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .razorpay-btn:hover {
+        background-color: #3F51B5;
+        transform: translateY(-2px);
+    }
+    
+    .payment-security {
+        margin-top: 30px;
+        font-size: 0.9rem;
+        text-align: center;
+        color: var(--light-text);
+    }
+    
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .loader {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .loader-spinner {
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--accent-color);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="payment-header">
+        <h2 class="crosho-heading">Complete Your Purchase</h2>
+        <p>Secure payment via Razorpay</p>
+    </div>
+    
+    <div class="payment-details">
+        <div class="detail-row">
+            <span class="detail-label">Order ID:</span>
+            <span>{{ order.id }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Items:</span>
+            <span>{{ order.get_total_items }} item{{ order.get_total_items|pluralize }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Subtotal:</span>
+            <span>₹{{ order.get_cart_total|floatformat:2 }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Shipping:</span>
+            <span>₹{{ order.shipping_cost|floatformat:2 }}</span>
+        </div>
+        <div class="detail-row" style="border-bottom: none;">
+            <span class="detail-label" style="font-size: 1.2rem;">Total Amount:</span>
+            <span style="font-size: 1.2rem; font-weight: 600;">₹{{ order.get_total|floatformat:2 }}</span>
+        </div>
+    </div>
+    
+    <div class="loader" id="paymentLoader">
+        <div class="loader-spinner"></div>
+        <p>Processing payment...</p>
+    </div>
+
+    <!-- CSRF Token -->
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+    
+    <button id="rzp-button" class="razorpay-btn">
+      <i class="fas fa-lock"> Pay Securely with Razorpay</i>
+  </button>
+    {% comment %} <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <input type="hidden" id="order_id" value="{{ order.id }}">   {% endcomment %}
+    
+    <div class="payment-security">
+        <p>Your payment information is processed securely. We do not store your credit card details.</p>
+        <div class="security-badge">
+            <img src="{% static 'images/ssl-secure.png' %}" alt="SSL Secure" height="40">
+            <img src="{% static 'images/razorpay-secure.png' %}" alt="Razorpay Secure" height="40">
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById("rzp-button").addEventListener("click", function () {
+    fetch("{% url 'create_razorpay_order' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            amount_inr: {{ total|floatformat:2 }}
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+          const options = {
+            key: "{{ razorpay_key_id }}",
+            amount: data.order.amount,
+            currency: "INR",
+            name: "Your Store",
+            description: "Yarn Purchase",
+            image: "/static/images/logo.png",
+            order_id: data.order.id,
+            handler: function (response) {
+                window.location.href = "{% url 'order_success' %}?payment_id=" + response.razorpay_payment_id;
+            },
+            theme: {
+                color: "#0d6efd"
+            },
+            method: {
+                upi: true,
+                card: false,
+                netbanking: false,
+                wallet: false
+            },
+            config: {
+                display: {
+                    blocks: {
+                        upi_block: {
+                            name: "Pay via UPI",
+                            instruments: [
+                                { method: "upi" }
+                            ]
+                        }
+                    },
+                    sequence: ["upi_block"],
+                    preferences: {
+                        show_default_blocks: false
+                    }
+                }
+            }
+        };
+        
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert(data.message || "Failed to create Razorpay order.");
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert("Something went wrong. Please try again.");
+    });
+});
+</script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}
+

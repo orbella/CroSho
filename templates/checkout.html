@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Checkout | CroSho{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+    <!-- Checkout Header -->
+    <div class="checkout-header py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-0">
+                        <i class="fas fa-shopping-bag text-primary me-2"></i> Checkout
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'view_cart' %}">Cart</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'shop' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Checkout Form -->
+            <div class="col-lg-7 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-user-circle text-primary me-2"></i> Shipping Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" id="checkout-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="preferred_currency" id="preferred-currency" value="INR">
+                            
+                            <!-- Shipping Address -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="id_first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="id_first_name" name="first_name" 
+                                           value="{{ request.user.first_name|default:'' }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="id_last_name" name="last_name" 
+                                           value="{{ request.user.last_name|default:'' }}" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="id_email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="id_email" name="email" 
+                                           value="{{ request.user.email|default:'' }}" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="id_address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="id_address" name="shipping_address" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="id_city" name="city" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="id_state" class="form-label">State/Province</label>
+                                    <input type="text" class="form-control" id="id_state" name="state" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="id_zip_code" class="form-label">Zip Code</label>
+                                    <input type="text" class="form-control" id="id_zip_code" name="zip_code" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="id_country" class="form-label">Country</label>
+                                    <select class="form-select" id="id_country" name="country" required>
+                                        <option value="">Select Country</option>
+                                        <option value="US">United States</option>
+                                        <option value="CA">Canada</option>
+                                        <option value="UK">United Kingdom</option>
+                                        <option value="IN" selected>India</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="id_phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="id_phone" name="phone" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Method -->
+                            <div class="mt-4 pt-3 border-top">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-credit-card text-primary me-2"></i> Payment Method
+                                </h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="credit-card" value="credit_card" checked>
+                                    <label class="form-check-label" for="credit-card">
+                                        <i class="fab fa-cc-visa me-1"></i>
+                                        <i class="fab fa-cc-mastercard me-1"></i>
+                                        <i class="fab fa-cc-amex me-1"></i>
+                                        Credit/Debit Card
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="paypal" value="paypal">
+                                    <label class="form-check-label" for="paypal">
+                                        <i class="fab fa-paypal me-1"></i> PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="razorpay" value="razorpay">
+                                    <label class="form-check-label" for="razorpay">
+                                        <i class="fas fa-money-check-alt me-1"></i> Razorpay
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="cash-on-delivery" value="cod">
+                                    <label class="form-check-label" for="cash-on-delivery">
+                                        <i class="fas fa-money-bill-wave me-1"></i> Cash on Delivery
+                                    </label>
+                                </div>
+                                
+                                <!-- Credit Card Form -->
+                                <div id="credit-card-form" class="mt-3 p-3 bg-light rounded">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label for="card-number" class="form-label">Card Number</label>
+                                            <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" name="card_number">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="card-name" class="form-label">Name on Card</label>
+                                            <input type="text" class="form-control" id="card-name" placeholder="John Doe" name="card_name">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="card-expiry" class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" id="card-expiry" placeholder="MM/YY" name="card_expiry">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="card-cvc" class="form-label">CVC</label>
+                                            <input type="text" class="form-control" id="card-cvc" placeholder="123" name="card_cvc">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Notes -->
+                            <div class="mt-4 pt-3 border-top">
+                                <label for="order-notes" class="form-label">
+                                    <i class="fas fa-edit text-primary me-2"></i> Order Notes (Optional)
+                                </label>
+                                <textarea class="form-control" id="order-notes" rows="3" 
+                                          placeholder="Special instructions, gift message, etc." name="order_notes"></textarea>
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="terms-agree" name="terms_agree" required>
+                                <label class="form-check-label" for="terms-agree">
+                                    I agree to the <a href="{% url 'terms_of_service' %}" target="_blank">Terms and Conditions</a> and 
+                                    <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="complete-order">
+                                    <i class="fas fa-lock me-2"></i> Complete Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-white">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-receipt text-primary me-2"></i> Order Summary
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Cart Items -->
+                        <div class="cart-items mb-3">
+                            {% for item in cart_items %}
+                            <div class="cart-item d-flex mb-3 pb-3 border-bottom">
+                                <div class="flex-shrink-0">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" class="rounded" width="80" height="80" 
+                                         alt="{{ item.product.name }}" style="object-fit: contain;">
+                                    {% else %}
+                                    <div class="rounded bg-light d-flex align-items-center justify-content-center" 
+                                         style="width: 80px; height: 80px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-1">{{ item.product.name }}</h6>
+                                    <p class="text-muted small mb-1">Quantity: {{ item.quantity }}</p>
+                                    <p class="mb-0 text-primary">
+                                        {% if item.product.currency == 'USD' %}
+                                            ₹{{ item.total_price|multiply:83|floatformat:2 }}
+                                        {% else %}
+                                            ₹{{ item.total_price|floatformat:2 }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Order Totals -->
+                        <div class="order-totals">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>₹{{ cart_total_inr|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping:</span>
+                                <span id="shipping-cost">₹{{ shipping_cost_inr|floatformat:2 }}</span>
+                            </div>
+                            {% if discount_amount_inr > 0 %}
+                            <div class="d-flex justify-content-between mb-2 text-success">
+                                <span>Discount:</span>
+                                <span>-₹{{ discount_amount_inr|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex justify-content-between border-top pt-2 mb-3">
+                                <strong>Total (INR):</strong>
+                                <strong id="order-total-inr">₹{{ total_inr|floatformat:2 }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <strong>Total (USD):</strong>
+                                <strong id="order-total-usd">${{ total_inr|divide:83|floatformat:2 }}</strong>
+                            </div>
+                            
+                            <!-- Currency Preference -->
+                            <div class="mb-3">
+                                <label class="form-label">Display Total In:</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="currency_display" 
+                                           id="currency-inr" value="INR" checked>
+                                    <label class="form-check-label" for="currency-inr">INR (₹)</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="currency_display" 
+                                           id="currency-usd" value="USD">
+                                    <label class="form-check-label" for="currency-usd">USD ($)</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Discount Code -->
+                            <div class="input-group mb-4">
+                                <input type="text" class="form-control" placeholder="Discount code" id="discount-code">
+                                <button class="btn btn-outline-secondary" type="button" id="apply-discount">
+                                    Apply
+                                </button>
+                            </div>
+                            
+                            <!-- Secure Checkout Badges -->
+                            <div class="text-center py-2 border rounded bg-light">
+                                <p class="small mb-1">
+                                    <i class="fas fa-lock text-success me-1"></i> Secure Checkout
+                                </p>
+                                <div class="d-flex justify-content-center">
+                                    <img src="{% static 'images/ssl-secure.png' %}" alt="SSL Secure" height="30" class="me-2">
+                                    <img src="{% static 'images/payment-methods.png' %}" alt="Payment Methods" height="30">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-page {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 40px;
+    }
+    
+    .checkout-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 1px solid #eaeaea;
+    }
+    
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .cart-item img {
+        object-fit: contain;
+        background-color: #f8f9fa;
+    }
+    
+    #credit-card-form {
+        display: none;
+    }
+    
+    #credit-card:checked ~ #credit-card-form {
+        display: block;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+    }
+    
+    .form-check-input {
+        cursor: pointer;
+    }
+    
+    .order-totals {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    @media (max-width: 991.98px) {
+        .sticky-top {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Currency conversion constants
+    const USD_TO_INR = 83;
+    const BASE_SHIPPING_INR = 500;
+    const FREE_SHIPPING_THRESHOLD_INR = 4000;
+    let cartTotalInr = {{ cart_total_inr }};
+    let shippingCostInr = {{ shipping_cost_inr }};
+    let discountAmountInr = {{ discount_amount_inr }};
+    let totalInr = {{ total_inr }};
+
+    // Update total display based on currency preference
+    function updateTotalDisplay() {
+        const currency = document.querySelector('input[name="currency_display"]:checked').value;
+        document.getElementById('preferred-currency').value = currency;
+        if (currency === 'INR') {
+            document.getElementById('order-total-inr').style.display = 'inline';
+            document.getElementById('order-total-usd').style.display = 'none';
+        } else {
+            document.getElementById('order-total-inr').style.display = 'none';
+            document.getElementById('order-total-usd').style.display = 'inline';
+        }
+    }
+
+    // Currency toggle
+    document.querySelectorAll('input[name="currency_display"]').forEach(radio => {
+        radio.addEventListener('change', updateTotalDisplay);
+    });
+
+    // Show/hide credit card form
+    document.querySelectorAll('input[name="payment_method"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('credit-card-form').style.display = 
+                this.value === 'credit_card' ? 'block' : 'none';
+        });
+    });
+
+    // Update shipping cost
+    if (cartTotalInr >= FREE_SHIPPING_THRESHOLD_INR) {
+        shippingCostInr = 0;
+        document.getElementById('shipping-cost').textContent = 'FREE';
+        totalInr = cartTotalInr - discountAmountInr;
+        document.getElementById('order-total-inr').textContent = '₹' + totalInr.toFixed(2);
+        document.getElementById('order-total-usd').textContent = '$' + (totalInr / USD_TO_INR).toFixed(2);
+    }
+
+    // Discount code application
+    document.getElementById('apply-discount').addEventListener('click', function() {
+        const code = document.getElementById('discount-code').value.trim();
+        if (code) {
+            fetch(`/apply-discount/?code=${code}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        discountAmountInr = data.discount_amount_inr;
+                        totalInr = cartTotalInr - discountAmountInr + (cartTotalInr >= FREE_SHIPPING_THRESHOLD_INR ? 0 : BASE_SHIPPING_INR);
+                        
+                        // Add discount row
+                        const discountRow = document.createElement('div');
+                        discountRow.className = 'd-flex justify-content-between mb-2 text-success';
+                        discountRow.innerHTML = `
+                            <span>Discount:</span>
+                            <span>-₹${discountAmountInr.toFixed(2)}</span>
+                        `;
+                        const totals = document.querySelector('.order-totals');
+                        totals.insertBefore(discountRow, totals.children[2]);
+                        
+                        // Update totals
+                        document.getElementById('order-total-inr').textContent = '₹' + totalInr.toFixed(2);
+                        document.getElementById('order-total-usd').textContent = '$' + (totalInr / USD_TO_INR).toFixed(2);
+                        
+                        // Disable discount input
+                        document.getElementById('discount-code').disabled = true;
+                        this.disabled = true;
+                        this.textContent = 'Applied';
+                        
+                        alert('Discount applied successfully!');
+                    } else {
+                        alert(data.message || 'Invalid discount code');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error applying discount. Please try again.');
+                });
+        } else {
+            alert('Please enter a discount code');
+        }
+    });
+
+    // Form submission handling
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!document.getElementById('terms-agree').checked) {
+            alert('You must agree to the terms and conditions');
+            return false;
+        }
+        
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        if (paymentMethod === 'credit_card') {
+            const cardNumber = document.getElementById('card-number').value.replace(/\s+/g, '');
+            const cardName = document.getElementById('card-name').value.trim();
+            const cardExpiry = document.getElementById('card-expiry').value;
+            const cardCvc = document.getElementById('card-cvc').value;
+            
+            if (!cardNumber || !/^\d{16}$/.test(cardNumber)) {
+                alert('Please enter a valid 16-digit card number');
+                return false;
+            }
+            
+            if (!cardName) {
+                alert('Please enter the name on card');
+                return false;
+            }
+            
+            if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                alert('Please enter a valid expiry date in MM/YY format');
+                return false;
+            }
+            
+            if (!cardCvc || !/^\d{3,4}$/.test(cardCvc)) {
+                alert('Please enter a valid CVC (3 or 4 digits)');
+                return false;
+            }
+        }
+        
+        if (paymentMethod === 'razorpay') {
+            // Create Razorpay order
+            fetch('/create-razorpay-order/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    amount_inr: totalInr
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const options = {
+                        key: '{{ RAZORPAY_KEY_ID }}',
+                        amount: data.order.amount,
+                        currency: 'INR',
+                        name: 'CroSho',
+                        description: 'Order Payment',
+                        order_id: data.order.id,
+                        handler: function(response) {
+                            // Submit form with Razorpay payment details
+                            const form = document.getElementById('checkout-form');
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'razorpay_payment_id';
+                            input.value = response.razorpay_payment_id;
+                            form.appendChild(input);
+                            form.submit();
+                        },
+                        prefill: {
+                            name: document.getElementById('id_first_name').value + ' ' + document.getElementById('id_last_name').value,
+                            email: document.getElementById('id_email').value,
+                            contact: document.getElementById('id_phone').value
+                        },
+                        theme: {
+                            color: '#8e6c88'
+                        }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                } else {
+                    alert(data.message || 'Error creating Razorpay order');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error initiating Razorpay payment');
+            });
+        } else {
+            // Submit form for other payment methods
+            this.submit();
+        }
+    });
+
+    // Auto-format credit card inputs
+    document.getElementById('card-number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        let matches = value.match(/\d{4,16}/g);
+        let match = matches && matches[0] || '';
+        let parts = [];
+        
+        for (let i=0, len=match.length; i<len; i+=4) {
+            parts.push(match.substring(i, i+4));
+        }
+        
+        if (parts.length) {
+            e.target.value = parts.join(' ');
+        }
+    });
+
+    document.getElementById('card-expiry').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+
+    document.getElementById('card-cvc').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/gi, '');
+    });
+});
+</script>
+{% endblock %}

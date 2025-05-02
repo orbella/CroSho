@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Cart - CroSho{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1>{{ product.proname }} Added to Cart</h1>
+    <p>Price: {% if product.currency == 'USD' %}${% else %}₹{% endif %}{{ product.price|floatformat:2 }}</p>
+    <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+    <h2>Recommended Products</h2>
+    <div class="row">
+        {% for rp in recommended_products %}
+        <div class="col-md-4">
+            <h5>{{ rp.proname }}</h5>
+            <p>Price: {% if rp.currency == 'USD' %}${% else %}₹{% endif %}{{ rp.price|floatformat:2 }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Community - CroSho{% endblock %}
+
+{% block content %}
+
+<!-- Video Background -->
+<div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; overflow: hidden;">
+    <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-crochet-work-11739-large.mp4" type="video/mp4">
+    </video>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(248, 241, 233, 0.85);"></div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Community Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5" style="font-family: 'Playfair Display', serif; color: #5E807F;">
+                    <i class="fas fa-people-group me-2"></i> CroSho Community
+                </h1>
+                <p class="lead" style="color: #D4A5A5;">Share your stitches and connect with fellow crafters</p>
+                <div class="crochet-divider">
+                    <i class="fas fa-heart" style="color: #D4A5A5;"></i>
+                </div>
+            </div>
+
+            <!-- Create Post Card -->
+            <div class="card mb-4 border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.95); border-radius: 12px;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                             class="rounded-circle me-3" width="50" height="50" style="object-fit: cover; border: 2px solid #A3D4D5;">
+                        <button class="btn btn-outline-secondary flex-grow-1 text-start rounded-pill py-2"
+                                style="border-color: #A3D4D5; color: #5E807F;"
+                                data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            What's on your hook today?
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-around">
+                        <button class="btn btn-link text-decoration-none" 
+                                style="color: #5E807F;" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-image me-1"></i> Photo
+                        </button>
+                        <button class="btn btn-link text-decoration-none" 
+                                style="color: #5E807F;" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-video me-1"></i> Video
+                        </button>
+                        <button class="btn btn-link text-decoration-none" 
+                                style="color: #5E807F;" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                            <i class="fas fa-question-circle me-1"></i> Question
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            {% for post in posts %}
+            <div class="card mb-4 border-0 shadow-sm" style="background-color: rgba(255, 255, 255, 0.95); border-radius: 12px;">
+                <!-- Post Header -->
+                <div class="card-header border-0 bg-transparent">
+                    <div class="d-flex align-items-center">
+                        {% comment %} <img src=" {% endcomment %}
+                        {% comment %} {% if post.author.profile_picture %}{{ post.author.profile_picture.url }}{% else %} {% endcomment %}
+                        {% comment %} {% static 'images/image.jpg' %}"  {% endcomment %}
+                             {% comment %} class="rounded-circle me-3" width="40" height="40" style="object-fit: cover; border: 2px solid #A3D4D5;"> {% endcomment %}
+                        <div>
+                            <h6 class="mb-0" style="color: #5E807F;">{{ post.author.username }}</h6>
+                            <small class="text-muted">{{ post.created_at|timesince }} ago</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Post Image -->
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="card-img-top" style="object-fit: cover; height: 400px;">
+                {% endif %}
+                
+                <!-- Post Content -->
+                <div class="card-body">
+                    <p class="card-text">{{ post.content }}</p>
+                    
+                    <!-- Like/Comment Stats -->
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <span class="me-3" style="color: #5E807F;">
+                                <i class="fas fa-heart me-1"></i> {{ post.likes.count }} likes
+                            </span>
+                            <span style="color: #5E807F;">
+                                <i class="fas fa-comment me-1"></i> {{ post.comments.count }} comments
+                            </span>
+                        </div>
+                        <div>
+                            <span style="color: #5E807F;">
+                                <i class="fas fa-bookmark"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Like/Comment Buttons -->
+                    <div class="d-flex border-top border-bottom py-2 mb-3" style="border-color: #A3D4D5 !important;">
+                        <button class="btn btn-link text-decoration-none flex-grow-1 like-btn" 
+                                data-post-id="{{ post.id }}" style="color: #5E807F;">
+                            <i class="far fa-heart me-1"></i> Like
+                        </button>
+                        <button class="btn btn-link text-decoration-none flex-grow-1 comment-toggle" 
+                                style="color: #5E807F;">
+                            <i class="far fa-comment me-1"></i> Comment
+                        </button>
+                        <button class="btn btn-link text-decoration-none flex-grow-1" 
+                                style="color: #5E807F;">
+                            <i class="fas fa-share me-1"></i> Share
+                        </button>
+                    </div>
+                    
+                    <!-- Comments Section -->
+                    <div class="comments-section" style="display: none;">
+                        {% for comment in post.comments.all|slice:":3" %}
+                        <div class="d-flex mb-3">
+                            <img src="{% if comment.author.profile_picture %}{{ comment.author.profile_picture.url }}{% else %}
+                            {% static 'images/image.jpg' %}{% endif %}" 
+                                 class="rounded-circle me-3" width="32" height="32" style="object-fit: cover; border: 1px solid #A3D4D5;">
+                            <div>
+                                <div style="background-color: #F8F1E9; padding: 8px 12px; border-radius: 18px;">
+                                    <strong style="color: #5E807F;">{{ comment.author.username }}</strong>
+                                    <p class="mb-0">{{ comment.text }}</p>
+                                </div>
+                                <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- View All Comments -->
+                        {% if post.comments.count > 3 %}
+                        <div class="text-center mb-3">
+                            <a href="#" class="text-decoration-none small" style="color: #5E807F;">
+                                View all {{ post.comments.count }} comments
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Add Comment -->
+                        <form class="mt-3 comment-form" data-post-id="{{ post.id }}">
+                            <div class="d-flex">
+                                <input type="text" class="form-control rounded-pill me-2" 
+                                       placeholder="Add a comment..." style="border-color: #A3D4D5;">
+                                <button type="submit" class="btn btn-sm rounded-pill" 
+                                        style="background-color: #5E807F; color: white;">
+                                    Post
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="fas fa-comment-slash display-4 mb-3" style="color: #A3D4D5;"></i>
+                <h4 style="color: #5E807F;">No posts yet</h4>
+                <p class="text-muted">Be the first to share your crochet journey!</p>
+                <button class="btn rounded-pill px-4" 
+                        style="background-color: #5E807F; color: white;"
+                        data-bs-toggle="modal" data-bs-target="#createPostModal">
+                    Create First Post
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="createPostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 12px;">
+            <div class="modal-header border-0" style="background-color: #5E807F; color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i> Create Post
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: rgba(255, 255, 255, 0.95);">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-center mb-4">
+                        <h6 class="mb-0" style="color: #5E807F;">{{ user.username }}</h6>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <textarea class="form-control" name="content" rows="5" 
+                                  placeholder="What's on your hook today?" 
+                                  style="border-color: #A3D4D5; background-color: #FFF9F5;"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="btn btn-outline-secondary w-100 rounded-pill py-2" 
+                               style="border-color: #A3D4D5; color: #5E807F;">
+                            <i class="fas fa-image me-2"></i> Add Photo/Video
+                            <input type="file" name="image" class="d-none" accept="image/*">
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn rounded-pill py-2" 
+                                style="background-color: #5E807F; color: white;">
+                            Post
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap');
+    
+    .crochet-divider {
+        position: relative;
+        height: 1px;
+        background-color: #A3D4D5;
+        margin: 1.5rem auto;
+        width: 100px;
+    }
+    .crochet-divider i {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #FFF9F5;
+        padding: 0 10px;
+    }
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(94, 128, 127, 0.15) !important;
+    }
+    .like-btn.liked {
+        color: #D4A5A5 !important;
+    }
+    .like-btn.liked i {
+        font-weight: 900 !important;
+    }
+    .form-control:focus {
+        border-color: #5E807F;
+        box-shadow: 0 0 0 0.25rem rgba(94, 128, 127, 0.25);
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Toggle comments section
+        document.querySelectorAll('.comment-toggle').forEach(button => {
+            button.addEventListener('click', function() {
+                const commentsSection = this.closest('.card-body').querySelector('.comments-section');
+                commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+        
+        // Like button functionality
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('liked');
+                const icon = this.querySelector('i');
+                if (this.classList.contains('liked')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+                
+                // In a real app, you would send an AJAX request here
+                const postId = this.getAttribute('data-post-id');
+                console.log(`Liked post ${postId}`);
+            });
+        });
+        
+        // Comment form submission
+        document.querySelectorAll('.comment-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const input = this.querySelector('input');
+                const commentText = input.value.trim();
+                
+                if (commentText) {
+                    // In a real app, you would send an AJAX request here
+                    const postId = this.getAttribute('data-post-id');
+                    console.log(`Posted comment "${commentText}" on post ${postId}`);
+                    
+                    // Clear input
+                    input.value = '';
+                }
+            });
+        });
+        
+        // Video mute toggle
+        const video = document.querySelector('video');
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyM') {
+                video.muted = !video.muted;
+            }
+        });
+    });
+</script>
+{% endblock %}

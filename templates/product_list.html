@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - CroSho{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Search Form -->
+                    <form method="get" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control" 
+                                   placeholder="Search products..." 
+                                   value="{{ search_query }}">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Categories -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Categories</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if stitch_type %}stitch_type={{ stitch_type }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}sort={{ sort }}"
+                               class="list-group-item list-group-item-action{% if not current_category %} active{% endif %}">
+                                All Categories
+                            </a>
+                            {% for cat in categories %}
+                            <a href="?category={{ cat }}{% if search_query %}&q={{ search_query }}{% endif %}{% if stitch_type %}&stitch_type={{ stitch_type }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}&sort={{ sort }}"
+                               class="list-group-item list-group-item-action{% if current_category == cat %} active{% endif %}">
+                                {{ cat|title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Stitch Types -->
+                    {% if stitch_types %}
+                    <div class="mb-4">
+                        <h6 class="mb-3">Stitch Types</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}sort={{ sort }}"
+                               class="list-group-item list-group-item-action{% if not current_stitch %} active{% endif %}">
+                                All Stitches
+                            </a>
+                            {% for stitch in stitch_types %}
+                            <a href="?stitch_type={{ stitch }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}&sort={{ sort }}"
+                               class="list-group-item list-group-item-action{% if current_stitch == stitch %} active{% endif %}">
+                                {{ stitch|title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Price Range -->
+                    <div class="mb-3">
+                        <h6 class="mb-3">Price Range</h6>
+                        <form method="get" class="row g-2">
+                            <input type="hidden" name="category" value="{{ current_category }}">
+                            <input type="hidden" name="stitch_type" value="{{ current_stitch }}">
+                            <input type="hidden" name="sort" value="{{ sort }}">
+                            {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+                            
+                            <div class="col-6">
+                                <input type="number" name="min_price" class="form-control" 
+                                       placeholder="Min" value="{{ min_price }}" min="0">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" name="max_price" class="form-control" 
+                                       placeholder="Max" value="{{ max_price }}" min="0">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                                    Apply
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Clear Filters -->
+                    {% if current_category or current_stitch or min_price or max_price or search_query %}
+                    <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-danger w-100">
+                        <i class="fas fa-times me-1"></i> Clear All Filters
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Sorting and View Options -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h5 mb-0">
+                        {% if current_category %}{{ current_category|title }}{% else %}All{% endif %} Products
+                        {% if search_query %} matching "{{ search_query }}"{% endif %}
+                    </h2>
+                    <small class="text-muted">{{ page_obj.paginator.count }} products found</small>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="me-2">Sort by:</span>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                    id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if sort == 'newest' %}Newest{% endif %}
+                                {% if sort == 'price_asc' %}Price: Low to High{% endif %}
+                                {% if sort == 'price_desc' %}Price: High to Low{% endif %}
+                                {% if sort == 'popular' %}Most Popular{% endif %}
+                                {% if sort == 'rating' %}Top Rated{% endif %}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item" href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_stitch %}stitch_type={{ current_stitch }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=newest">Newest</a></li>
+                                <li><a class="dropdown-item" href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_stitch %}stitch_type={{ current_stitch }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=price_asc">Price: Low to High</a></li>
+                                <li><a class="dropdown-item" href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_stitch %}stitch_type={{ current_stitch }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=price_desc">Price: High to Low</a></li>
+                                <li><a class="dropdown-item" href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_stitch %}stitch_type={{ current_stitch }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=popular">Most Popular</a></li>
+                                <li><a class="dropdown-item" href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_stitch %}stitch_type={{ current_stitch }}&{% endif %}{% if min_price %}min_price={{ min_price }}&{% endif %}{% if max_price %}max_price={{ max_price }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=rating">Top Rated</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            {% if products %}
+            <div class="row">
+                {% for product in products %}
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 product-card shadow-sm">
+                        <!-- Product Image -->
+                        <div class="position-relative">
+                            <a href="{% url 'product_detail' product.id %}">
+                                <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                     class="card-img-top" 
+                                     alt="{{ product.proname }}"
+                                     style="height: 200px; object-fit: cover;">
+                            </a>
+                            <!-- Quick Actions -->
+                            <div class="product-actions position-absolute top-0 end-0 p-2">
+                                <button class="btn btn-sm btn-light rounded-circle shadow-sm wishlist-btn" 
+                                        data-product-id="{{ product.id }}"
+                                        title="Add to wishlist">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                            <!-- Rating Badge -->
+                            {% if product.avg_rating %}
+                            <div class="position-absolute bottom-0 start-0 m-2">
+                                <span class="badge bg-success bg-opacity-90 text-white">
+                                    <i class="fas fa-star me-1"></i>
+                                    {{ product.avg_rating|floatformat:1 }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Body -->
+                        <div class="card-body">
+                            <h5 class="card-title mb-1">
+                                <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
+                                    {{ product.proname|truncatechars:30 }}
+                                </a>
+                            </h5>
+                            <p class="small text-muted mb-2">by {{ product.username }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    {% if product.currency == 'USD' %}
+                                        ${{ product.price|floatformat:2 }}
+                                    {% else %}
+                                        ₹{{ product.price|floatformat:2 }}
+                                    {% endif %}
+                                </h6>
+                                {% if product.stitch_type %}
+                                <span class="badge bg-info bg-opacity-10 text-info">
+                                    {{ product.stitch_type|title }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-white border-0 pt-0">
+                            <button class="btn btn-sm btn-outline-primary w-100 add-to-cart-btn" 
+                                    data-product-id="{{ product.id }}">
+                                <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}{% if current_stitch %}&stitch_type={{ current_stitch }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort }}">
+                            &laquo; First
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_stitch %}&stitch_type={{ current_stitch }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort }}">
+                            Previous
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_stitch %}&stitch_type={{ current_stitch }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort }}">
+                                {{ num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_stitch %}&stitch_type={{ current_stitch }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort }}">
+                            Next
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ page_obj.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_stitch %}&stitch_type={{ current_stitch }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}&sort={{ sort }}">
+                            Last &raquo;
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-search fa-4x text-muted"></i>
+                </div>
+                <h4 class="mb-3">No products found</h4>
+                <p class="text-muted mb-4">Try adjusting your search or filter criteria</p>
+                <a href="{% url 'product_list' %}" class="btn btn-primary">
+                    <i class="fas fa-undo me-1"></i> Reset Filters
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-actions {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover .product-actions {
+        opacity: 1;
+    }
+    
+    .wishlist-btn:hover {
+        color: #dc3545 !important;
+    }
+    
+    .add-to-cart-btn:hover {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+    
+    @media (max-width: 767.98px) {
+        .product-actions {
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            fetch('/cart/add/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart count in navbar
+                    const cartCount = document.getElementById('cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.cart_count;
+                    }
+                    
+                    // Show toast notification
+                    const toast = new bootstrap.Toast(document.getElementById('cart-toast'));
+                    toast.show();
+                } else {
+                    alert(data.message || 'Error adding to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred');
+            });
+        });
+    });
+    
+    // Wishlist functionality
+    document.querySelectorAll('.wishlist-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const icon = this.querySelector('i');
+            
+            fetch('/wishlist/toggle/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.in_wishlist) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas', 'text-danger');
+                    } else {
+                        icon.classList.remove('fas', 'text-danger');
+                        icon.classList.add('far');
+                    }
+                    
+                    // Show toast notification
+                    const toast = new bootstrap.Toast(document.getElementById('wishlist-toast'));
+                    document.getElementById('wishlist-toast-message').textContent = data.message;
+                    toast.show();
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

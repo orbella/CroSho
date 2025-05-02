@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - CroSho{% endblock %}
+
+{% block content %}
+
+<!-- Video Background -->
+<div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1; overflow: hidden;">
+    <video autoplay muted loop class="w-100 h-100" style="object-fit: cover;">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-crochet-work-11739-large.mp4" type="video/mp4">
+    </video>
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(248, 241, 233, 0.85);"></div>
+</div>
+
+<div class="container-fluid py-5">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <!-- Left Column - Profile Summary -->
+        <div class="col-lg-4 d-none d-lg-flex align-items-center justify-content-center">
+            <div class="text-center p-5" style="max-width: 400px;">
+                <div class="mb-4 position-relative">
+                    <img src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'images/default-profile.png' %}{% endif %}" 
+                         class="rounded-circle shadow" width="150" height="150" 
+                         style="object-fit: cover; border: 3px solid #A3D4D5;">
+                    <button class="btn btn-sm position-absolute bottom-0 end-0 rounded-circle" 
+                            style="background-color: #D4A5A5; color: white; width: 40px; height: 40px;"
+                            onclick="document.getElementById('id_profile_picture').click()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                
+                <h3 style="font-family: 'Playfair Display', serif; color: #5E807F;">{{ user.get_full_name }}</h3>
+                <p class="text-muted small mb-4">Member since {{ user.date_joined|date:"F Y" }}</p>
+                
+                <div class="crochet-stats mb-4">
+                    <div class="d-flex justify-content-around">
+                        <div>
+                            <div class="h5 mb-0" style="color: #5E807F;">{{ orders_count }}</div>
+                            <div class="small text-muted">Orders</div>
+                        </div>
+                        <div>
+                            <div class="h5 mb-0" style="color: #5E807F;">{{ favorites_count }}</div>
+                            <div class="small text-muted">Favorites</div>
+                        </div>
+                        <div>
+                            <div class="h5 mb-0" style="color: #5E807F;">{{ projects_count }}</div>
+                            <div class="small text-muted">Projects</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="crochet-pattern-divider mb-3">
+                    <span style="background-color: #FFF9F5; padding: 0 15px; position: relative; z-index: 1;">
+                        <i class="fas fa-heart" style="color: #D4A5A5;"></i>
+                    </span>
+                </div>
+                
+                <a href="{% if user_info.user_type == 'seller' %}{% url 'seller_profile' %}{% else %}{% url 'buyer_profile' %}{% endif %}"
+   class="btn btn-sm rounded-0 mt-3"
+   style="background-color: transparent; color: #5E807F; border: 1px solid #5E807F;">
+    <i class="fas fa-arrow-left me-1"></i> Back to Profile
+</a>
+
+            </div>
+        </div>
+
+        <!-- Right Column - Edit Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow" style="background-color: rgba(255, 255, 255, 0.95); border-radius: 0;">
+                <div class="card-header border-0" style="background-color: transparent;">
+                    <h3 class="mb-0" style="color: #5E807F; font-family: 'Playfair Display', serif;">
+                        <i class="fas fa-user-edit me-2"></i> Edit Profile
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" id="profileForm">
+                        {% csrf_token %}
+                        
+                        <!-- Hidden Profile Picture Input -->
+                        <input type="file" id="id_profile_picture" name="profile_picture" accept="image/*" class="d-none" 
+                               onchange="previewProfilePicture(this)">
+                        
+                        <!-- Personal Information Section -->
+                        <div class="mb-4">
+                            <h5 class="mb-3" style="color: #5E807F; border-bottom: 1px solid #A3D4D5; padding-bottom: 0.5rem;">
+                                <i class="fas fa-user-circle me-2"></i> Personal Information
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small text-uppercase text-muted">First Name</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="first_name" value="{{ user.first_name }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Last Name</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="last_name" value="{{ user.last_name }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                          style="border-bottom: 2px solid #D4A5A5;">
+                                        <i class="fas fa-at" style="color: #5E807F;"></i>
+                                    </span>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="username" value="{{ user.username }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Bio</label>
+                                <textarea class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                          style="border-bottom: 2px solid #D4A5A5; background-color: transparent; min-height: 100px;"
+                                          name="bio">{% if user.bio %}{{ user.bio }}{% endif %}</textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact Information Section -->
+                        <div class="mb-4">
+                            <h5 class="mb-3" style="color: #5E807F; border-bottom: 1px solid #A3D4D5; padding-bottom: 0.5rem;">
+                                <i class="fas fa-address-book me-2"></i> Contact Information
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                          style="border-bottom: 2px solid #D4A5A5;">
+                                        <i class="fas fa-envelope" style="color: #5E807F;"></i>
+                                    </span>
+                                    <input type="email" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="email" value="{{ user.email }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent rounded-0 border-top-0 border-start-0 border-end-0" 
+                                          style="border-bottom: 2px solid #D4A5A5;">
+                                        <i class="fas fa-phone" style="color: #5E807F;"></i>
+                                    </span>
+                                    <input type="tel" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="phone_number" value="{% if user.phone_number %}{{ user.phone_number }}{% endif %}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Address Section -->
+                        <div class="mb-4">
+                            <h5 class="mb-3" style="color: #5E807F; border-bottom: 1px solid #A3D4D5; padding-bottom: 0.5rem;">
+                                <i class="fas fa-map-marker-alt me-2"></i> Address
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Street Address</label>
+                                <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                       style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                       name="address" value="{% if user.address %}{{ user.address }}{% endif %}">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small text-uppercase text-muted">City</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="city" value="{% if user.city %}{{ user.city }}{% endif %}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small text-uppercase text-muted">Postal Code</label>
+                                    <input type="text" class="form-control rounded-0 border-top-0 border-start-0 border-end-0" 
+                                           style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                           name="postal_code" value="{% if user.postal_code %}{{ user.postal_code }}{% endif %}">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase text-muted">Country</label>
+                                <select class="form-select rounded-0 border-top-0 border-start-0 border-end-0" 
+                                        style="border-bottom: 2px solid #D4A5A5; background-color: transparent;"
+                                        name="country">
+                                    <option value="">Select Country</option>
+                                    {% for code, name in countries %}
+                                    <option value="{{ code }}" {% if user.country == code %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary rounded-0" 
+        style="border-color: #D4A5A5; color: #5E807F;"
+        onclick="window.location.href='{% if user_info.user_type == "seller" %}{% url 'seller_profile' %}{% else %}{% url 'buyer_profile' %}{% endif %}'">
+    <i class="fas fa-times me-2"></i> Cancel
+</button>
+
+                            <button type="submit" class="btn rounded-0 text-white px-4" 
+                                    style="background-color: #5E807F; letter-spacing: 1px;">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&display=swap');
+    
+    body {
+        font-family: 'Montserrat', sans-serif;
+        overflow-x: hidden;
+    }
+    .card {
+        backdrop-filter: blur(5px);
+    }
+    .form-control, .form-select {
+        border-radius: 0 !important;
+    }
+    .form-control:focus, .form-select:focus {
+        box-shadow: none;
+        border-color: #5E807F;
+    }
+    .btn:hover {
+        background-color: #4a6c6b !important;
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    .crochet-pattern-divider {
+        position: relative;
+        height: 1px;
+        background-color: #A3D4D5;
+        margin: 1.5rem 0;
+    }
+    .crochet-stats {
+        background-color: rgba(163, 212, 213, 0.1);
+        padding: 1rem;
+        border-radius: 5px;
+    }
+    input[type="file"] {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Input focus effects
+        const inputs = document.querySelectorAll('.form-control, .form-select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderBottom = '2px solid #5E807F';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#D4A5A5';
+                }
+            });
+            input.addEventListener('blur', function() {
+                this.style.borderBottom = '2px solid #D4A5A5';
+                if(this.previousElementSibling && this.previousElementSibling.querySelector('i')) {
+                    this.previousElementSibling.querySelector('i').style.color = '#5E807F';
+                }
+            });
+        });
+
+        // Video mute toggle
+        const video = document.querySelector('video');
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyM') {
+                video.muted = !video.muted;
+            }
+        });
+    });
+
+    function previewProfilePicture(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.querySelector('.rounded-circle').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

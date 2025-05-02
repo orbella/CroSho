@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buyer Dashboard | CroSho{% endblock %}
+
+{% block content %}
+<div class="buyer-dashboard">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header bg-light py-4 mb-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-0">
+                        <i class="fas fa-home text-primary me-2"></i> My Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Welcome back, {{ request.user.first_name|default:request.user.username }}!</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'shop' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Recent Orders Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h3 class="h5 mb-0">
+                            <i class="fas fa-shopping-bag text-primary me-2"></i> Recent Orders
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders|slice:":5" %}
+                                    <tr>
+                                        <td>#{{ order.id|stringformat:"06d" }}</td>
+                                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                        <td>{{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+                                        <td>${{ order.get_total_cost|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if order.status == 'P' %}bg-warning text-dark
+                                                {% elif order.status == 'C' %}bg-success
+                                                {% elif order.status == 'X' %}bg-danger
+                                                {% else %}bg-info{% endif %}">
+                                                {{ order.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'buyer_orders' %}" class="btn btn-outline-secondary">
+                                View All Orders ({{ orders.count }})
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <img src="{% static 'images/empty-orders.svg' %}" alt="No orders" class="img-fluid mb-3" style="max-height: 150px;">
+                            <h5>No orders yet</h5>
+                            <p class="text-muted">Your order history will appear here</p>
+                            <a href="{% url 'shop' %}" class="btn btn-primary">Start Shopping</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Wishlist Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">
+                                <i class="fas fa-heart text-danger me-2"></i> My Wishlist
+                            </h3>
+                            <a href="{% url 'buyer_wishlist' %}" class="small">View All</a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if wishlist_items %}
+                        <div class="row g-3">
+                            {% for item in wishlist_items|slice:":4" %}
+                            <div class="col-md-6">
+                                <div class="product-card p-3 border rounded h-100">
+                                    <div class="row g-3">
+                                        <div class="col-4">
+                                            {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}" class="img-fluid rounded" alt="{{ item.product.name }}" style="height: 80px; object-fit: contain;">
+                                            {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 80px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-8">
+                                            <h5 class="h6 mb-1">{{ item.product.name|truncatechars:25 }}</h5>
+                                            <p class="text-primary mb-1">${{ item.product.price|floatformat:2 }}</p>
+                                            <div class="d-flex justify-content-between">
+                                                <a href="{{ item.product.get_absolute_url }}" class="btn btn-sm btn-outline-primary">View</a>
+                                                <form method="post" action="{% url 'remove_from_wishlist' item.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <img src="{% static 'images/empty-wishlist.svg' %}" alt="Empty wishlist" class="img-fluid mb-3" style="max-height: 150px;">
+                            <h5>Your wishlist is empty</h5>
+                            <p class="text-muted">Save your favorite items for later</p>
+                            <a href="{% url 'shop' %}" class="btn btn-primary">Browse Products</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Profile Summary -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body text-center">
+                        {% if request.user.profile.image %}
+                        <img src="{% get_media_prefix %}{{ user_info.profile_picture }}" 
+                             class="rounded-circle img-thumbnail mb-3" 
+                             width="120" 
+                             height="120"
+                             alt="Profile Picture">
+                        {% comment %} {% else %}
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 120px; height: 120px;">
+                            <i class="fas fa-user text-muted fa-3x"></i>
+                        </div> {% endcomment %}
+                        {% endif %}
+                        <h4 class="h5 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h4>
+                        <p class="text-muted small mb-3">Member since {{ request.user.date_joined|date:"M Y" }}</p>
+                        <a href="{% url 'buyer_profile' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-user-edit me-1"></i> Edit Profile
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="h6 mb-3 text-uppercase text-muted">Your Stats</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total Orders:</span>
+                            <strong>{{ orders.count }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Wishlist Items:</span>
+                            <strong>{{ wishlist_items.count }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Cart Items:</span>
+                            <strong>{{ cart_items|length }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Reviews Written:</span>
+                            <strong>{{ reviews.count }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Cart Preview -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h5 class="h6 mb-0">
+                            <i class="fas fa-shopping-cart text-primary me-2"></i> Your Cart
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cart_items %}
+                        <ul class="list-unstyled">
+                            {% for item in cart_items|slice:":3" %}
+                            <li class="mb-2 pb-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" class="rounded me-2" width="40" height="40" alt="{{ item.product.name }}">
+                                    {% else %}
+                                    <div class="rounded bg-light me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 small">{{ item.product.name|truncatechars:20 }}</h6>
+                                        <small class="text-muted">{{ item.quantity }} × ${{ item.price }}</small>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <strong>Total: ${{ cart_total|floatformat:2 }}</strong>
+                            <a href="{% url 'view_cart' %}" class="btn btn-sm btn-primary">View Cart</a>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-shopping-cart text-muted fa-3x mb-2"></i>
+                            <p class="text-muted small">Your cart is empty</p>
+                            <a href="{% url 'shop' %}" class="btn btn-sm btn-primary">Start Shopping</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Reviews -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h5 class="h6 mb-0">
+                            <i class="fas fa-star text-warning me-2"></i> Your Reviews
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if reviews %}
+                        <ul class="list-unstyled">
+                            {% for review in reviews|slice:":3" %}
+                            <li class="mb-3 pb-2 border-bottom">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <strong>{{ review.product.name|default:"Product" }}</strong>
+                                    <div class="text-warning small">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="small mb-0">{{ review.comment|truncatechars:60 }}</p>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="text-center mt-2">
+                            <a href="{% url 'buyer_reviews' %}" class="btn btn-sm btn-outline-secondary">View All ({{ reviews.count }})</a>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-comment-alt text-muted fa-3x mb-2"></i>
+                            <p class="text-muted small">You haven't reviewed any products yet</p>
+                            <a href="{% url 'shop' %}" class="btn btn-sm btn-primary">Shop Now</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .buyer-dashboard {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 120px);
+        padding-bottom: 40px;
+    }
+    
+    .dashboard-header {
+        border-bottom: 1px solid #eaeaea;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    
+    .product-card {
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #dee2e6 !important;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+        font-size: 0.75rem;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .img-thumbnail {
+        border: 3px solid #dee2e6;
+    }
+</style>
+{% endblock %}

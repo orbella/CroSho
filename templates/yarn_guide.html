@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Yarn Guide - CroSho{% endblock %}
+
+{% block content %}
+<style>
+    .yarn-guide-section {
+        background-color: var(--bg-color);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .yarn-guide-section h2, .yarn-guide-section h3 {
+        font-family: 'Croissant One', serif;
+        color: var(--tip-heading);
+    }
+    .yarn-guide-section p {
+        color: var(--text-color);
+    }
+    .yarn-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    .yarn-table th, .yarn-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border: 1px solid var(--accent-color);
+        color: var(--text-color);
+    }
+    .yarn-table th {
+        background-color: var(--tip-bg);
+        color: var(--tip-text);
+    }
+    .yarn-table tr:nth-child(even) {
+        background-color: var(--dropdown-bg);
+    }
+</style>
+
+<div class="container">
+    <div class="yarn-guide-section">
+        <h2 class="text-center mb-4">Yarn Guide</h2>
+        <p>Choosing the right yarn is key to a successful crochet project. This guide covers yarn weights, types, and their best uses.</p>
+        
+        <h3>Yarn Weights</h3>
+        <table class="yarn-table">
+            <thead>
+                <tr>
+                    <th>Weight</th>
+                    <th>Name</th>
+                    <th>Hook Size</th>
+                    <th>Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0</td>
+                    <td>Lace</td>
+                    <td>1.5-2.25 mm</td>
+                    <td>Delicate doilies, lace shawls</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Fingering</td>
+                    <td>2.25-3.25 mm</td>
+                    <td>Socks, lightweight scarves</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Worsted</td>
+                    <td>5.5-6.5 mm</td>
+                    <td>Blankets, sweaters, hats</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Super Bulky</td>
+                    <td>9-15 mm</td>
+                    <td>Chunky scarves, cozy rugs</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Yarn Types</h3>
+        <p><strong>Acrylic:</strong> Affordable, durable, and easy to wash. Great for beginners.</p>
+        <p><strong>Cotton:</strong> Soft and breathable, perfect for summer garments and dishcloths.</p>
+        <p><strong>Wool:</strong> Warm and elastic, ideal for winter wear like sweaters and mittens.</p>
+    </div>
+</div>
+{% endblock %}

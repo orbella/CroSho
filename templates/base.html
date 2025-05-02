@@ -1,0 +1,2477 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CroSho - Crochet Shop{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Yanone+Kaffeesatz:wght@400;500;600;700&family=Patrick+Hand&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&family=Sacramento&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Light Theme Colors - Soft Pastels */
+            --primary-color: #FFB6C1;       /* Light pink */
+            --secondary-color: #FFD1DC;     /* Pale pink */
+            --accent-color: #FF9AA2;        /* Coral pink */
+            --text-color: #5E5E5E;          /* Dark gray */
+            --light-text: #888888;          /* Medium gray */
+            --bg-color: #FFF5F7;           /* Very pale pink */
+            --card-bg: #FFFFFF;             /* White */
+            --border-color: #FFD6E0;       /* Light pink border */
+            --nav-bg: rgba(255, 245, 247, 0.95);
+            --footer-bg: #FFE5EA;           /* Pale pink footer */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-color: #FF8F9D;         /* Saturated pink */
+            --dropdown-bg: rgba(255, 255, 255, 0.95);
+            --success-color: #D4EDDA;       /* Pale green */
+            --info-color: #D1ECF1;          /* Pale blue */
+            --warning-color: #FFF3CD;       /* Pale yellow */
+            --danger-color: #F8D7DA;        /* Pale red */
+            --icon-invert: 0;              /* For dark mode icons */
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Colors - Muted Jewel Tones */
+            --primary-color: #A37B8C;       /* Dusty rose */
+            --secondary-color: #8A6A7D;     /* Muted purple */
+            --accent-color: #C99DA3;        /* Soft pink */
+            --text-color: #F8F9FA;          /* Bright white */
+            --light-text: #E5D5DC;         /* Pale lavender */
+            --bg-color: #2D2327;           /* Dark eggplant */
+            --card-bg: #3A2E32;            /* Dark slate */
+            --border-color: #5A4A4F;       /* Dark gray */
+            --nav-bg: rgba(45, 35, 39, 0.95);
+            --footer-bg: #3A2E32;          /* Dark slate footer */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --hover-color: #D4A5AD;         /* Soft coral */
+            --dropdown-bg: rgba(58, 46, 50, 0.95);
+            --success-color: #1C3A23;       /* Dark green */
+            --info-color: #1A3A4A;          /* Dark blue */
+            --warning-color: #4A3A1A;       /* Dark yellow */
+            --danger-color: #4A1A22;        /* Dark red */
+            --icon-invert: 1;               /* For light mode icons */
+        }
+
+        /* New Pattern Overlay */
+        .pattern-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,10 Q25,5 30,10 T40,10' stroke='%23FFB6C1' fill='none' stroke-width='1' opacity='0.1'/%3E%3C/svg%3E");
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .pattern-overlay.active {
+            opacity: 0.3;
+        }
+
+        [data-theme="dark"] .pattern-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,10 Q25,5 30,10 T40,10' stroke='%23A37B8C' fill='none' stroke-width='1' opacity='0.1'/%3E%3C/svg%3E");
+        }
+
+        /* New Moving Banner Styles */
+        .marquee-banner {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+            color: white;
+            padding: 12px 0;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            position: fixed;
+            top: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            width: 100vw; /* Full viewport width */
+            margin-left: calc(-50vw + 50%); /* Center align trick */
+        }
+
+        .marquee-container {
+            max-width: 100%; /* Allow full width */
+            padding: 0 15px; /* Add padding to prevent edge-cutting */
+            overflow: hidden; /* Hide overflow */
+            display: flex;
+            width: 100%;
+            align-items: center;
+        }
+
+        .marquee-label {
+            position: relative;
+            z-index: 1; /* Ensure it stays on top */
+            background-color: rgba(0, 0, 0, 0.2); /* Slightly darker for visibility */
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-right: 20px;
+            white-space: nowrap; /* Prevent text wrapping */
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+        }
+
+        .marquee-label i {
+            margin-right: 8px;
+        }
+
+        .marquee-content {
+            display: flex;
+            animation: scroll 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .marquee-item {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 40px;
+            font-size: 0.95rem;
+        }
+
+        .marquee-item i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .marquee-item a {
+            color: white;
+            text-decoration: underline;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .marquee-item a:hover {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Pause on hover */
+        .marquee-content:hover {
+            animation-play-state: paused;
+        }
+
+        /* Stitch divider */
+        .marquee-divider {
+            position: relative;
+            margin: 0 20px;
+        }
+
+        .marquee-divider::before {
+            content: "🧶";
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.7;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .marquee-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .marquee-label {
+                margin-bottom: 8px;
+                margin-right: 0;
+                align-self: flex-start;
+            }
+            
+            .marquee-content {
+                width: 100%;
+                overflow-x: auto;
+                animation: none;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 5px;
+            }
+            
+            .marquee-item {
+                margin-right: 20px;
+            }
+        }
+
+        @keyframes banner-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @media (max-width: 768px) {
+            .marquee-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .marquee-label {
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+            .marquee-content {
+                width: 100%;
+                overflow-x: auto;
+                animation: none; /* Disable animation on mobile */
+            }
+        }
+
+        /* Enhanced Dropdown Styling */
+        .dropdown-menu {
+            background-color: var(--dropdown-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-top: 8px;
+            backdrop-filter: blur(5px);
+            min-width: 200px;
+            padding: 10px 0;
+            z-index: 2000;
+            transform-origin: top;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            opacity: 0;
+            transform: scaleY(0);
+            display: block;
+            visibility: hidden;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            transform: scaleY(1);
+            visibility: visible;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(var(--accent-color-rgb), 0.1);
+            color: var(--hover-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item::before {
+            content: '🧶';
+            position: absolute;
+            left: -5px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover::before {
+            left: 5px;
+            opacity: 1;
+        }
+
+        .dropdown-divider {
+            border-color: var(--border-color);
+            opacity: 0.5;
+            margin: 8px 0;
+        }
+
+        /* Navbar dropdown triggers */
+        .nav-link.dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+            border-top: 0.3em solid;
+            border-right: 0.3em solid transparent;
+            border-bottom: 0;
+            border-left: 0.3em solid transparent;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link.dropdown-toggle.show::after {
+            transform: rotate(-180deg);
+        }
+
+        /* User dropdown specific styling */
+        #userDropdown .role-indicator {
+            transition: all 0.3s ease;
+        }
+
+        #userDropdown:hover .role-indicator {
+            transform: scale(1.1);
+        }
+
+        /* Font hierarchy */
+        body {
+            font-family: 'Patrick Hand', cursive;
+            font-weight: 400;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: 1px;
+        }
+
+        .navbar-brand {
+            font-family: 'Parisienne', cursive;
+            font-size: 2.8rem;
+            color: var(--primary-color) !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .nav-link, .btn, .dropdown-item {
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .handwritten {
+            font-family: 'Parisienne', cursive;
+        }
+
+        .crosho-heading {
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+
+        /* Enhanced Contrast for Dark Mode */
+        [data-theme="dark"] {
+            --text-color: #F8F9FA;          /* Pure white for best contrast */
+            --light-text: #E5D5DC;         /* Light lavender */
+        }
+
+        /* Role-based UI indicators */
+        .role-indicator {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        .buyer-indicator {
+            background-color: var(--info-color);
+            color: #0c5460;
+        }
+
+        [data-theme="dark"] .buyer-indicator {
+            background-color: #1A3A4A;
+            color: #D1ECF1;
+        }
+
+        .seller-indicator {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        [data-theme="dark"] .seller-indicator {
+            background-color: #A37B8C;
+            color: #F8F9FA;
+        }
+
+        .admin-indicator {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        [data-theme="dark"] .admin-indicator {
+            background-color: #C99DA3;
+            color: #2D2327;
+        }
+
+        /* Base Structure */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
+        body {
+            padding-top: 60px; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--nav-bg);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px);
+            {% comment %} padding-top: 10px; {% endcomment %}
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            {% comment %} top: 30px; {% endcomment %}
+        }
+
+        .navbar-toggler {
+            border: 2px solid var(--accent-color);
+            background-color: var(--primary-color);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+        }
+
+        .navbar-toggler:hover {
+            background-color: var(--hover-color);
+            transform: rotate(15deg);
+        }
+
+        .navbar-toggler:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .toggler-icon {
+            font-size: 1.2rem;
+            color: var(--card-bg);
+            position: relative;
+            z-index: 1002;
+        }
+
+        .toggler-stitch {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 10 H15 M10 5 V15' stroke='%23FF9AA2' stroke-width='2' opacity='0.3'/%3E%3C/svg%3E");
+            background-size: 20px 20px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:hover .toggler-stitch {
+            animation: stitch-wave 0.5s ease-in-out;
+        }
+
+        @keyframes stitch-wave {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .nav-link {
+            color: var(--text-color) !important;
+            font-weight: 600;
+            position: relative;
+            margin: 0 0.5rem;
+            font-size: 1.15rem;
+        }
+
+        .nav-link:hover {
+            color: var(--hover-color) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            background-color: var(--dropdown-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-top: 5px;
+            backdrop-filter: blur(5px);
+            min-width: 180px;
+            padding: 10px 0;
+            z-index: 2000;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(var(--accent-color-rgb), 0.1);
+            color: var(--hover-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-divider {
+            border-color: var(--border-color);
+            opacity: 0.5;
+        }
+
+        /* Buttons */
+        .btn-crosho {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 8px 22px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        .btn-crosho:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-outline-crosho {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 25px;
+            padding: 7px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        .btn-outline-crosho:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--text-color);
+            border-top: 1px solid var(--border-color);
+            z-index: 200;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            transition: all 0.3s ease;
+        }
+
+        footer .container {
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+        footer .footer-content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            height: 0;
+            overflow: hidden;
+            padding: 0 8px;
+        }
+
+        footer:hover {
+            height: auto;
+        }
+
+        footer:hover .footer-content {
+            opacity: 1;
+            height: auto;
+        }
+
+        .footer-heading {
+            font-family: 'Sacramento', cursive;
+            font-size: 1.4rem;
+            margin-bottom: 0.4rem;
+            color: var(--accent-color);
+        }
+
+        .footer-link {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+            margin-bottom: 0.2rem;
+            font-size: 0.9rem;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .footer-link:hover {
+            color: var(--hover-color);
+            transform: translateX(5px);
+        }
+
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-icon:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-3px);
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: var(--shadow);
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .alert-success {
+            background-color: var(--success-color);
+            color: var(--text-color);
+            border-left: 5px solid #28a745;
+        }
+
+        .alert-danger {
+            background-color: var(--danger-color);
+            color: var(--text-color);
+            border-left: 5px solid #dc3545;
+        }
+
+        .alert-warning {
+            background-color: var(--warning-color);
+            color: var(--text-color);
+            border-left: 5px solid #ffc107;
+        }
+
+        .alert-info {
+            background-color: var(--info-color);
+            color: var(--text-color);
+            border-left: 5px solid #17a2b8;
+        }
+
+        /* Shopping Cart */
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        /* Search Form */
+        .search-form {
+            position: relative;
+            margin-right: 10px;
+        }
+
+        .search-input {
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding-right: 40px;
+            transition: all 0.3s ease;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(211, 175, 163, 0.25);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            border: none;
+            background: transparent;
+            color: var(--light-text);
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 10px 0;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .breadcrumb-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-color);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--hover-color);
+        }
+
+        /* Headings */
+        .crosho-heading {
+            position: relative;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+        }
+
+        .crosho-heading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        /* Stitch Pattern Background */
+        .stitch-pattern {
+            position: relative;
+            overflow: visible;
+        }
+
+        .stitch-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,10 L50,30 L30,50 L10,30 Z' stroke='%23FFB6C1' fill='none' stroke-width='1' opacity='0.1'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        [data-theme="dark"] .stitch-pattern::before {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,10 L50,30 L30,50 L10,30 Z' stroke='%23A37B8C' fill='none' stroke-width='1' opacity='0.1'/%3E%3C/svg%3E");
+        }
+
+        /* Forms */
+        .form-control, .form-select {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(255, 182, 193, 0.25);
+        }
+
+        /* Tables */
+        .table {
+            color: var(--text-color);
+            border-color: var(--border-color);
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-family: 'Yanone Kaffeesatz', sans-serif;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+        }
+
+        /* Yarn Ball Floating Button */
+        .yarn-ball {
+            position: fixed;
+            left: 80%;
+            top: 80%;
+            width: 50px;
+            height: 50px;
+            background-image: 
+                radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle, var(--secondary-color), var(--primary-color));
+            background-size: 4px 4px, cover;
+            border-radius: 50%;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.2),
+                inset 2px -2px 5px rgba(0,0,0,0.1);
+            z-index: 1100;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            will-change: transform;
+        }
+
+        .yarn-ball[data-dragging="true"] {
+            opacity: 0.8;
+            transform: scale(1.1);
+            touch-action: none;
+        }
+
+        .yarn-ball::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 4px;
+            background-color: var(--accent-color);
+            transform: rotate(45deg);
+            opacity: 0.5;
+            border-radius: 2px;
+        }
+
+        .yarn-ball::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 50%;
+            transform: translate(10px, -10px);
+            opacity: 0.3;
+        }
+
+        .yarn-ball i {
+            color: var(--card-bg);
+            font-size: 1.3rem;
+        }
+
+        .yarn-ball:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            animation: none;
+        }
+
+        .yarn-ball.bounce {
+            animation: bounce 0.4s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .yarn-ball:active {
+            transform: scale(0.95);
+        }
+
+        /* Yarn Ball Menu */
+        .yarn-ball-menu {
+            position: fixed;
+            top: calc(-120px);
+            right: 10px;
+            width: 180px;
+            height: auto;
+            display: none;
+            flex-direction: column;
+            background-color: var(--dropdown-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 8px 0;
+            z-index: 1200;
+            overflow: visible;
+            backdrop-filter: blur(3px);
+        }
+
+        .yarn-ball-menu.active {
+            display: flex;
+            visibility: visible;
+        }
+
+        .yarn-ball-menu-item {
+            position: relative;
+            width: 100%;
+            margin: 4px 0;
+            padding: 10px 16px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-align: left;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            transform: translateY(0);
+            z-index: 1201;
+            pointer-events: auto;
+        }
+
+        .yarn-ball-menu-item:hover {
+            background-color: var(--accent-color);
+            color: var(--card-bg);
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-color: var(--hover-color);
+        }
+
+        .yarn-ball-menu-item:active {
+            transform: scale(0.98);
+        }
+
+        .yarn-ball-menu-item i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+
+        .yarn-ball-menu-item:hover i {
+            color: var(--card-bg);
+        }
+
+        /* Paw Drag Handle */
+        .paw-drag {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            z-index: 1101;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .paw-drag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: var(--accent-color);
+        }
+
+        .paw-drag:active {
+            transform: scale(0.95);
+        }
+
+        /* Modals */
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .modal-header, .modal-footer {
+            border-color: var(--border-color);
+        }
+
+        .modal-title {
+            font-family: 'Amatic SC', cursive;
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        /* Games */
+        .yarn-winder-ball, .stitch-card {
+            width: 100px;
+            height: 100px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .yarn-winder-ball:hover, .stitch-card:hover {
+            transform: scale(1.05);
+        }
+
+        .yarn-winder-ball:active, .stitch-card:active {
+            transform: scale(0.95);
+        }
+
+        .stitch-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            font-size: 0.9rem;
+            text-align: center;
+            transform: rotateY(0deg);
+            transition: transform 0.4s ease;
+            font-family: 'Patrick Hand', cursive;
+        }
+
+        .stitch-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .stitch-card.matched {
+            background-color: var(--success-color);
+            cursor: default;
+        }
+
+        /* Copyright Tab */
+        .copyright-tab {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 30px;
+            border-radius: 20px 20px 0 0;
+            cursor: pointer;
+            z-index: 201;
+            box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-family: 'Amatic SC', cursive;
+            font-size: 1.3rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .copyright-tab:hover {
+            padding: 8px 40px;
+            background-color: var(--accent-color);
+        }
+
+        /* Layout */
+        .content-wrapper {
+            flex-grow: 1;
+            margin-bottom: 120px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 100px);
+            padding-bottom: 120px;
+        }
+
+        .footer-clear {
+            min-height: 120px;
+            width: 100%;
+        }
+
+        /* Links */
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--hover-color);
+        }
+
+        /* Close Buttons */
+        .btn-close {
+            filter: invert(var(--icon-invert));
+        }
+
+        [data-theme="dark"] .btn-close {
+            filter: invert(1);
+        }
+
+        /* Theme Icon */
+        .theme-icon::before {
+            content: '\f186';
+        }
+
+        [data-theme="dark"] .theme-icon::before {
+            content: '\f185';
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background-color: var(--card-bg);
+                padding: 1rem;
+                border-radius: 10px;
+                box-shadow: var(--shadow);
+                margin-top: 10px;
+                border: 1px solid var(--border-color);
+            }
+
+            .search-form {
+                margin-top: 10px;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .dropdown-menu {
+                border: none;
+                box-shadow: none;
+                padding-left: 1.5rem;
+                background-color: transparent;
+            }
+
+            .navbar-toggler {
+                width: 36px;
+                height: 36px;
+                padding: 6px;
+            }
+
+            .toggler-icon {
+                font-size: 1.1rem;
+            }
+
+            .crosho-banner {
+                padding: 2rem 0.5rem;
+            }
+
+            .banner-content h1 {
+                font-size: 2rem;
+            }
+
+            .banner-content p {
+                font-size: 1.2rem;
+            }
+
+            .banner-content .btn-crosho {
+                font-size: 1rem;
+                padding: 8px 20px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .navbar {
+                padding: 10px 12px;
+            }
+
+            .navbar-brand {
+                font-size: 2rem;
+            }
+
+            .nav-link {
+                font-size: 1rem;
+                margin: 0.3rem 0;
+            }
+
+            .btn-crosho, .btn-outline-crosho {
+                padding: 6px 18px;
+                font-size: 1rem;
+            }
+
+            .search-input {
+                padding: 6px 35px 6px 10px;
+                font-size: 1rem;
+            }
+
+            .yarn-ball {
+                width: 40px;
+                height: 40px;
+                left: 85%;
+                top: 85%;
+            }
+
+            .yarn-ball i {
+                font-size: 1.1rem;
+            }
+
+            .yarn-ball::before {
+                width: 24px;
+                height: 3px;
+            }
+
+            .yarn-ball::after {
+                width: 16px;
+                height: 16px;
+                transform: translate(8px, -8px);
+            }
+
+            .yarn-ball-menu {
+                top: calc(-100px);
+                right: 10px;
+                width: 160px;
+            }
+
+            .yarn-ball-menu-item {
+                width: 100%;
+                font-size: 0.95rem;
+                padding: 8px 14px;
+            }
+
+            .paw-drag {
+                width: 25px;
+                height: 25px;
+                font-size: 0.9rem;
+            }
+
+            .navbar-toggler {
+                width: 34px;
+                height: 34px;
+                padding: 5px;
+            }
+
+            .toggler-icon {
+                font-size: 1rem;
+            }
+
+            footer {
+                position: static;
+                height: auto;
+                min-height: 50px;
+                overflow: visible;
+                display: block;
+                opacity: 1;
+            }
+
+            footer .container {
+                padding: 4px 10px;
+            }
+
+            footer .footer-content {
+                display: block;
+                opacity: 1;
+                height: auto;
+                overflow: visible;
+                padding: 4px;
+            }
+
+            .copyright-tab {
+                display: none;
+            }
+
+            .footer-content .row {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-content .col-md-3 {
+                margin-bottom: 0.4rem;
+            }
+
+            .footer-heading {
+                font-size: 1.1rem;
+                margin-top: 0.4rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .footer-link {
+                font-size: 0.85rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .social-icon {
+                width: 30px;
+                height: 30px;
+                margin-right: 8px;
+            }
+
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .card {
+                border-radius: 12px;
+            }
+
+            .crosho-heading {
+                font-size: 2rem;
+            }
+
+            .content-wrapper {
+                margin-bottom: 20px;
+            }
+
+            .main-content {
+                padding-bottom: 20px;
+            }
+
+            .footer-clear {
+                min-height: 20px;
+            }
+
+            .yarn-winder-ball, .stitch-card {
+                width: 80px;
+                height: 80px;
+            }
+
+            .crosho-banner {
+                padding: 2rem 0.5rem;
+            }
+
+            .banner-content h1 {
+                font-size: 1.8rem;
+            }
+
+            .banner-content p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .navbar-brand {
+                font-size: 1.8rem;
+            }
+
+            .nav-link {
+                font-size: 0.95rem;
+            }
+
+            .dropdown-item {
+                font-size: 1rem;
+                padding: 6px 15px;
+            }
+
+            .search-input {
+                font-size: 0.9rem;
+                padding: 5px 30px 5px 8px;
+            }
+
+            .btn-crosho, .btn-outline-crosho {
+                padding: 5px 15px;
+                font-size: 0.9rem;
+            }
+
+            .yarn-ball {
+                width: 35px;
+                height: 35px;
+                left: 85%;
+                top: 85%;
+            }
+
+            .yarn-ball i {
+                font-size: 1rem;
+            }
+
+            .yarn-ball::before {
+                width: 20px;
+                height: 2px;
+            }
+
+            .yarn-ball::after {
+                width: 14px;
+                height: 14px;
+                transform: translate(7px, -7px);
+            }
+
+            .yarn-ball-menu {
+                top: calc(-90px);
+                right: 10px;
+                width: 140px;
+            }
+
+            .yarn-ball-menu-item {
+                width: 100%;
+                font-size: 0.9rem;
+                padding: 6px 12px;
+            }
+
+            .paw-drag {
+                width: 22px;
+                height: 22px;
+                font-size: 0.8rem;
+            }
+
+            .navbar-toggler {
+                width: 32px;
+                height: 32px;
+                padding: 4px;
+            }
+
+            .toggler-icon {
+                font-size: 0.9rem;
+            }
+
+            .footer-heading {
+                font-size: 1rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .footer-link {
+                font-size: 0.8rem;
+            }
+
+            .social-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.85rem;
+            }
+
+            .crosho-heading {
+                font-size: 1.8rem;
+            }
+
+            .crosho-heading::after {
+                width: 60px;
+                height: 2px;
+            }
+
+            .crosho-banner {
+                padding: 1rem 0.5rem;
+            }
+
+            .banner-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .banner-content p {
+                font-size: 0.9rem;
+            }
+
+            .banner-content .btn-crosho {
+                font-size: 0.9rem;
+                padding: 6px 15px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar, .yarn-ball, .paw-drag, footer, .crosho-banner, .pattern-overlay {
+                display: none !important;
+            }
+            
+            body {
+                background-color: white !important;
+                color: black !important;
+                font-size: 12pt;
+            }
+            
+            a {
+                color: black !important;
+                text-decoration: underline;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="stitch-pattern d-flex flex-column min-vh-100">
+    <!-- Pattern Overlay -->
+    <div class="pattern-overlay" id="patternOverlay"></div>
+
+    <!-- Moving Banner -->
+    <div class="marquee-banner">
+        <div class="container marquee-container">
+            <div class="marquee-label">
+                <i class="fas fa-info-circle"></i> Crochet News
+            </div>
+            <div class="marquee-content">
+                <div class="marquee-item">
+                    <i class="fas fa-tag"></i> Summer Sale! 20% off all yarns with code <a href="{% url 'shop' %}">CROCHET20</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-graduation-cap"></i> New tutorial: How to make the perfect granny square <a href="{% url 'tutorials' %}">Watch now</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-shipping-fast"></i> Free shipping on orders over $50 <a href="{% url 'shop' %}">Shop now</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-calendar-alt"></i> Join our monthly crochet-along starting June 1st <a href="{% url 'community' %}">Learn more</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-lightbulb"></i> Tip: Use a larger hook for softer drape in wearables
+                </div>
+                <!-- Duplicate items for seamless looping -->
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-tag"></i> Summer Sale! 20% off all yarns with code <a href="{% url 'shop' %}">CROCHET20</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-graduation-cap"></i> New tutorial: How to make the perfect granny square <a href="{% url 'tutorials' %}">Watch now</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-shipping-fast"></i> Free shipping on orders over $50 <a href="{% url 'shop' %}">Shop now</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-calendar-alt"></i> Join our monthly crochet-along starting June 1st <a href="{% url 'community' %}">Learn more</a>
+                </div>
+                <div class="marquee-divider"></div>
+                <div class="marquee-item">
+                    <i class="fas fa-lightbulb"></i> Tip: Use a larger hook for softer drape in wearables
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">CroSho</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="toggler-icon">🪡</span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="shopDropdown">Shop</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'shop' %}">All Products</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop' %}?stitch=granny">Granny Square</a></li>
+                            <li><a class="dropdown-item" href="{% url 'shop' %}?stitch=amigurumi">Amigurumi</a></li>
+                            <li><a class="dropdown-item" href="{% url 'patterns' %}?category=home">Home Decor</a></li>
+                            <li><a class="dropdown-item" href="{% url 'patterns' %}?category=accessories">Accessories</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'patterns' %}?difficulty=beginner">For Beginners</a></li>
+                            <li><a class="dropdown-item" href="{% url 'patterns' %}?difficulty=intermediate">Intermediate</a></li>
+                            <li><a class="dropdown-item" href="{% url 'patterns' %}?difficulty=advanced">Advanced</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="learnDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Learn
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="learnDropdown">
+                            <li><a class="dropdown-item" href="{% url 'tutorials' %}">Tutorials</a></li>
+                            <li><a class="dropdown-item" href="{% url 'yarn_guide' %}">Yarn Guide</a></li>
+                            <li><a class="dropdown-item" href="#">Crochet Basics</a></li>
+                            <li><a class="dropdown-item" href="#">Size Charts</a></li>
+                            <li><a class="dropdown-item" href="#">Care Instructions</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'community' %}">Community</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            About
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
+                            <li><a class="dropdown-item" href="{% url 'about_us' %}">Our Story</a></li>
+                            <li><a class="dropdown-item" href="{% url 'contact' %}">Contact Us</a></li>
+                            <li><a class="dropdown-item" href="{% url 'blog' %}">Blog</a></li>
+                            <li><a class="dropdown-item" href="#">Join Our Team</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <form class="search-form d-none d-md-block" action="{% url 'shop' %}" method="GET">
+                        <input class="form-control search-input" name="search" placeholder="Search products...">
+                        <button type="submit" class="search-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                    <div class="d-flex align-items-center">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i> 
+                                {{ user.username }}
+                                {% if user.is_staff %}
+                                    <span class="admin-indicator role-indicator">Admin</span>
+                                {% elif request.session.user_type == 'seller' %}
+                                    <span class="seller-indicator role-indicator">Seller</span>
+                                {% else %}
+                                    <span class="buyer-indicator role-indicator">Buyer</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'admin_dashboard' %}">Admin Dashboard</a></li>
+                                {% endif %}
+                                {% if request.session.user_type == 'seller' %}
+                                    <li><a class="dropdown-item" href="{% url 'seller_dashboard' %}">Seller Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'seller_profile' %}">My Profile</a></li>
+                                {% endif %}
+                                {% if request.session.user_type == 'buyer' %}
+                                    <li><a class="dropdown-item" href="{% url 'buyer_dashboard' %}">My Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'buyer_orders' %}">My Wishlist</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </div>
+                        {% if request.session.user_type == 'buyer' or user.is_staff %}
+    <a href="{% url 'view_cart' %}" class="btn btn-link position-relative ms-2">
+        <i class="fas fa-shopping-bag"></i>
+        {% if cart_count > 0 %}
+            <span class="cart-badge">{{ cart_count }}</span>
+        {% endif %}
+    </a>
+{% else %}
+    <a href="javascript:void(0);" class="btn btn-link position-relative ms-2" 
+       data-bs-toggle="tooltip" data-bs-placement="bottom" 
+       title="Cart access is only available to buyers.">
+        <i class="fas fa-shopping-bag text-muted"></i>
+    </a>
+{% endif %}
+
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-outline-crosho me-2">Login</a>
+                            <a href="{% url 'role_selection' %}" class="btn btn-crosho">Register</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %} 
+    
+    <!-- Main Content -->
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer id="mainFooter">
+        <div class="copyright-tab" id="copyrightTab">
+            <i class="fas fa-chevron-up me-2"></i> CroSho © 2025
+        </div>
+        <div class="container footer-content">
+            <div class="row">
+                <div class="col-md-3 col-sm-6">
+                    <h5 class="footer-heading">CroSho</h5>
+                    <p>Connecting crochet enthusiasts with quality supplies and patterns since 2023.</p>
+                    <div class="mt-2">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h5 class="footer-heading">Quick Links</h5>
+                    <a href="{% url 'home' %}" class="footer-link">Home</a>
+                    <a href="{% url 'shop' %}" class="footer-link">Shop</a>
+                    <a href="{% url 'patterns' %}" class="footer-link">Patterns</a>
+                    <a href="{% url 'tutorials' %}" class="footer-link">Tutorials</a>
+                    <a href="{% url 'community' %}" class="footer-link">Community</a>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h5 class="footer-heading">Resources</h5>
+                    <a href="{% url 'yarn_guide' %}" class="footer-link">Yarn Guide</a>
+                    <a href="#" class="footer-link">Crochet Basics</a>
+                    <a href="#" class="footer-link">Size Charts</a>
+                    <a href="#" class="footer-link">Care Instructions</a>
+                    <a href="{% url 'blog' %}" class="footer-link">Blog</a>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <h5 class="footer-heading">Newsletter</h5>
+                    <p>Subscribe for updates on new patterns, tutorials, and special offers.</p>
+                    <form action="{% url 'newsletter_subscribe' %}" method="POST" class="mt-2">
+                        {% csrf_token %}
+                        <div class="input-group mb-0">
+                            <input type="email" name="email" class="form-control" placeholder="Your Email" required style="padding: 3px 6px; font-size: 0.85rem;">
+                            <button class="btn btn-crosho" type="submit" style="padding: 3px 10px; font-size: 0.85rem;">Join</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="mt-0.5 mb-0.3" style="border-color: var(--border-color);">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0" style="font-size: 0.8rem;">© 2025 CroSho. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'terms_of_service' %}" class="me-3 text-decoration-none" style="color: var(--text-color); font-size: 0.8rem;">Terms of Service</a>
+                    <a href="{% url 'privacy_policy' %}" class="text-decoration-none" style="color: var(--text-color); font-size: 0.8rem;">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Yarn Ball and Paw Drag -->
+    <div class="yarn-ball" id="yarnBall" role="button" aria-label="Toggle settings menu" aria-expanded="false" tabindex="0" data-dragging="false">
+        <i class="fas fa-yarn"></i>
+    </div>
+    <div class="paw-drag" id="pawDrag" role="button" aria-label="Drag yarn ball" tabindex="0">
+        🐾
+    </div>
+    <div class="yarn-ball-menu" id="yarnBallMenu" role="menu" aria-orientation="vertical">
+        <div class="yarn-ball-menu-item" data-bs-toggle="modal" data-bs-target="#yarnWinderModal" tabindex="0" role="menuitem" aria-label="Yarn Winder Game">
+            <i class="fas fa-gamepad"></i> Yarn Winder
+        </div>
+        <div class="yarn-ball-menu-item" data-bs-toggle="modal" data-bs-target="#stitchMatchModal" tabindex="0" role="menuitem" aria-label="Stitch Match Game">
+            <i class="fas fa-puzzle-piece"></i> Stitch Match
+        </div>
+        <div class="yarn-ball-menu-item" id="themeToggle" tabindex="0" role="menuitem" aria-label="Toggle Theme">
+            <i class="fas theme-icon"></i> Toggle Theme
+        </div>
+        <div class="yarn-ball-menu-item" id="patternToggle" tabindex="0" role="menuitem" aria-label="Toggle Pattern Overlay">
+            <i class="fas fa-border-all"></i> Pattern Overlay
+        </div>
+    </div>
+
+    <!-- Yarn Winder Game Modal -->
+    <div class="modal fade" id="yarnWinderModal" tabindex="-1" aria-labelledby="yarnWinderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="yarnWinderModalLabel">Yarn Winder Game</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Click the yarn ball as fast as you can in 10 seconds to wind it up! Score = yards wound.</p>
+                    <div class="yarn-winder-ball mx-auto" id="yarnWinderBall" onclick="windYarn()">
+                        <i class="fas fa-yarn" style="color: white; font-size: 2rem;"></i>
+                    </div>
+                    <div class="mt-3">
+                        <p>Time: <span id="gameTimer">10</span>s</p>
+                        <p>Score: <span id="gameScore">0</span> yards</p>
+                        <p>High Score: <span id="highScore">0</span> yards</p>
+                    </div>
+                    <button class="btn btn-crosho mt-3" onclick="startYarnWinder()">Start Game</button>
+                    <button class="btn btn-outline-crosho mt-2" onclick="resetYarnWinder()">Reset</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-crosho" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stitch Match Game Modal -->
+    <div class="modal fade" id="stitchMatchModal" tabindex="-1" aria-labelledby="stitchMatchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="stitchMatchModalLabel">Stitch Match Game</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Flip cards to match crochet stitches. Fewest moves wins!</p>
+                    <div id="stitchMatchBoard" class="d-flex flex-wrap justify-content-center" style="max-width: 400px; margin: auto;">
+                        <!-- Cards will be generated by JS -->
+                    </div>
+                    <div class="mt-3">
+                        <p>Moves: <span id="moveCounter">0</span></p>
+                        <p>Best Score: <span id="bestScore">0</span></p>
+                    </div>
+                    <button class="btn btn-crosho mt-3" onclick="startStitchMatch()">New Game</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-crosho" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="icon" href="{% static 'images/favicon.jpg' %}">
+
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+    
+
+    <!-- Interactive JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const yarnBall = document.getElementById('yarnBall');
+            const pawDrag = document.getElementById('pawDrag');
+            const yarnBallMenu = document.getElementById('yarnBallMenu');
+            const patternOverlay = document.getElementById('patternOverlay');
+            const dragStatus = document.getElementById('dragStatus');
+            if (!yarnBall || !pawDrag || !yarnBallMenu || !patternOverlay) {
+                console.error('Yarn ball, paw drag, menu, or pattern overlay not found in DOM');
+                return;
+            }
+
+            let isDragging = false;
+            let currentX = 0;
+            let currentY = 0;
+            let offsetX = 0;
+            let offsetY = 0;
+            let lastScrollPosition = 0;
+            let lastBounceTime = 0;
+
+            // Load saved position
+            function loadYarnBallPosition() {
+                try {
+                    const savedPosition = localStorage.getItem('yarnBallPosition');
+                    if (savedPosition) {
+                        const { left, top } = JSON.parse(savedPosition);
+                        const clamped = clampPosition(left, top);
+                        yarnBall.style.left = `${clamped.x}px`;
+                        yarnBall.style.top = `${clamped.y}px`;
+                        currentX = clamped.x;
+                        currentY = clamped.y;
+                        updatePawPosition();
+                    } else {
+                        const rect = yarnBall.getBoundingClientRect();
+                        currentX = rect.left;
+                        currentY = rect.top;
+                    }
+                } catch (e) {
+                    console.error('Error loading yarn ball position:', e);
+                }
+            }
+
+            // Save position
+            function saveYarnBallPosition() {
+                try {
+                    localStorage.setItem('yarnBallPosition', JSON.stringify({
+                        left: currentX,
+                        top: currentY
+                    }));
+                } catch (e) {
+                    console.error('Error saving yarn ball position:', e);
+                }
+            }
+
+            // Update menu and paw position
+            function updateMenuPosition() {
+                try {
+                    if (yarnBallMenu.classList.contains('active')) {
+                        const viewportWidth = window.innerWidth;
+                        const menuWidth = yarnBallMenu.offsetWidth;
+                        const offsetY = window.innerWidth <= 767.98 ? (window.innerWidth <= 575.98 ? -90 : -100) : -120;
+                        yarnBallMenu.style.left = `${Math.min(currentX, viewportWidth - menuWidth - 10)}px`;
+                        yarnBallMenu.style.top = `${currentY + offsetY}px`;
+                    }
+                    updatePawPosition();
+                } catch (e) {
+                    console.error('Error updating menu position:', e);
+                }
+            }
+
+            // Update paw position
+            function updatePawPosition() {
+                try {
+                    const yarnBallRect = yarnBall.getBoundingClientRect();
+                    const offsetX = yarnBallRect.width + 10; // 10px gap
+                    pawDrag.style.left = `${currentX + offsetX}px`;
+                    pawDrag.style.top = `${currentY + (yarnBallRect.height - pawDrag.offsetHeight) / 2}px`;
+                } catch (e) {
+                    console.error('Error updating paw position:', e);
+                }
+            }
+
+            // Clamp position to viewport
+            function clampPosition(x, y) {
+                const rect = yarnBall.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+                return {
+                    x: Math.max(0, Math.min(x, maxX)),
+                    y: Math.max(0, Math.min(y, maxY))
+                };
+            }
+
+            // Drag handlers
+            function startDrag(e) {
+                try {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    isDragging = true;
+                    yarnBall.setAttribute('data-dragging', 'true');
+                    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                    offsetX = clientX - currentX;
+                    offsetY = clientY - currentY;
+                    dragStatus && (dragStatus.textContent = 'Dragging yarn ball');
+                    console.log('Drag started:', { clientX, clientY, offsetX, offsetY });
+                } catch (e) {
+                    console.error('Error in startDrag:', e);
+                }
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                try {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                    const newX = clientX - offsetX;
+                    const newY = clientY - offsetY;
+                    const clamped = clampPosition(newX, newY);
+                    currentX = clamped.x;
+                    currentY = clamped.y;
+                    yarnBall.style.left = `${currentX}px`;
+                    yarnBall.style.top = `${currentY}px`;
+                    updateMenuPosition();
+                    console.log('Dragging:', { currentX, currentY });
+                } catch (e) {
+                    console.error('Error in drag:', e);
+                }
+            }
+
+            function endDrag(e) {
+                if (isDragging) {
+                    try {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        isDragging = false;
+                        yarnBall.setAttribute('data-dragging', 'false');
+                        saveYarnBallPosition();
+                        updateMenuPosition();
+                        dragStatus && (dragStatus.textContent = 'Yarn ball drag ended');
+                        console.log('Drag ended:', { currentX, currentY });
+                    } catch (e) {
+                        console.error('Error in endDrag:', e);
+                    }
+                }
+            }
+
+            // Mouse drag on paw
+            pawDrag.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', endDrag);
+
+            // Touch drag on paw
+            pawDrag.addEventListener('touchstart', startDrag, { passive: false });
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('touchend', endDrag, { passive: false });
+
+            // Keyboard movement via paw
+            pawDrag.addEventListener('keydown', (e) => {
+                try {
+                    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                        e.preventDefault();
+                        let newX = currentX;
+                        let newY = currentY;
+                        const step = 10;
+                        if (e.key === 'ArrowUp') newY -= step;
+                        if (e.key === 'ArrowDown') newY += step;
+                        if (e.key === 'ArrowLeft') newX -= step;
+                        if (e.key === 'ArrowRight') newX += step;
+                        const clamped = clampPosition(newX, newY);
+                        currentX = clamped.x;
+                        currentY = clamped.y;
+                        yarnBall.style.left = `${currentX}px`;
+                        yarnBall.style.top = `${currentY}px`;
+                        saveYarnBallPosition();
+                        updateMenuPosition();
+                        dragStatus && (dragStatus.textContent = `Yarn ball moved to x:${currentX}, y:${currentY}`);
+                        console.log('Keyboard move:', { key: e.key, currentX, currentY });
+                    }
+                } catch (e) {
+                    console.error('Error in keyboard movement:', e);
+                }
+            });
+
+            // Theme Toggle Logic
+            const themeToggle = document.getElementById('themeToggle');
+            function toggleTheme() {
+                try {
+                    const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    document.body.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    console.log('Theme toggled:', newTheme);
+                } catch (e) {
+                    console.error('Error in toggleTheme:', e);
+                }
+            }
+
+            function loadTheme() {
+                try {
+                    const savedTheme = localStorage.getItem('theme');
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+                    document.body.setAttribute('data-theme', theme);
+                    console.log('Theme loaded:', theme);
+                } catch (e) {
+                    console.error('Error in loadTheme:', e);
+                }
+            }
+
+            loadTheme();
+            themeToggle.addEventListener('click', toggleTheme);
+            themeToggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+            });
+
+            // Pattern Overlay Toggle
+            const patternToggle = document.getElementById('patternToggle');
+            function togglePatternOverlay() {
+                try {
+                    const isActive = patternOverlay.classList.toggle('active');
+                    localStorage.setItem('patternOverlay', isActive ? 'active' : 'inactive');
+                    console.log('Pattern overlay toggled:', isActive);
+                } catch (e) {
+                    console.error('Error in togglePatternOverlay:', e);
+                }
+            }
+
+            function loadPatternOverlay() {
+                try {
+                    const savedState = localStorage.getItem('patternOverlay');
+                    if (savedState === 'active') {
+                        patternOverlay.classList.add('active');
+                    }
+                    console.log('Pattern overlay loaded:', savedState);
+                } catch (e) {
+                    console.error('Error in loadPatternOverlay:', e);
+                }
+            }
+
+            loadPatternOverlay();
+            patternToggle.addEventListener('click', togglePatternOverlay);
+            patternToggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    togglePatternOverlay();
+                }
+            });
+
+            // Yarn Ball Menu Logic
+            if (!document.querySelector('.fa-yarn')) {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .fa-yarn:before {
+                        content: "\\f7e6";
+                        font-family: "Font Awesome 6 Free";
+                        font-weight: 900;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            function toggleYarnBallMenu(e) {
+                try {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isExpanded = yarnBallMenu.classList.toggle('active');
+                    yarnBall.setAttribute('aria-expanded', isExpanded);
+                    yarnBallMenu.style.display = isExpanded ? 'flex' : 'none';
+                    if (isExpanded) updateMenuPosition();
+                    console.log('Menu toggled:', { isExpanded, display: yarnBallMenu.style.display });
+                } catch (e) {
+                    console.error('Error in toggleYarnBallMenu:', e);
+                }
+            }
+
+            // Yarn ball click/touch handlers for menu
+            yarnBall.addEventListener('click', toggleYarnBallMenu);
+            yarnBall.addEventListener('touchend', toggleYarnBallMenu, { passive: false });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!yarnBall.contains(e.target) && !yarnBallMenu.contains(e.target) && !pawDrag.contains(e.target)) {
+                    yarnBallMenu.classList.remove('active');
+                    yarnBall.setAttribute('aria-expanded', 'false');
+                    yarnBallMenu.style.display = 'none';
+                    console.log('Menu closed: Clicked outside');
+                }
+                const dropdowns = document.querySelectorAll('.dropdown-menu');
+                dropdowns.forEach(dropdown => {
+                    if (!dropdown.parentElement.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            });
+
+            // Keyboard navigation for yarn ball
+            yarnBall.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleYarnBallMenu(e);
+                }
+            });
+
+            // Keyboard navigation for yarn ball menu
+            const menuItems = yarnBallMenu.querySelectorAll('.yarn-ball-menu-item');
+            menuItems.forEach((item, index) => {
+                item.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        item.click();
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const nextIndex = (index + 1) % menuItems.length;
+                        menuItems[nextIndex].focus();
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const prevIndex = (index - 1 + menuItems.length) % menuItems.length;
+                        menuItems[prevIndex].focus();
+                    }
+                });
+            });
+
+            // Scroll bounce
+            window.addEventListener('scroll', function() {
+                try {
+                    const scrollPosition = window.scrollY;
+                    const scrollDistance = Math.abs(scrollPosition - lastScrollPosition);
+                    const currentTime = Date.now();
+
+                    if (scrollDistance > 50 && currentTime - lastBounceTime > 500) {
+                        yarnBall.classList.remove('bounce');
+                        void yarnBall.offsetWidth;
+                        yarnBall.classList.add('bounce');
+                        lastBounceTime = currentTime;
+                    }
+
+                    lastScrollPosition = scrollPosition;
+
+                    if (scrollPosition > 100) {
+                        yarnBall.style.backgroundImage = `
+                            radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                            radial-gradient(circle, var(--secondary-color), var(--accent-color))
+                        `;
+                    } else {
+                        yarnBall.style.backgroundImage = `
+                            radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                            radial-gradient(circle, var(--secondary-color), var(--primary-color))
+                        `;
+                    }
+                } catch (e) {
+                    console.error('Error in scroll handler:', e);
+                }
+            });
+
+            // Yarn Winder Game Logic
+            let gameInterval = null;
+            let gameTime = 10;
+            let gameScore = 0;
+            let isGameRunning = false;
+
+            window.windYarn = function() {
+                if (isGameRunning) {
+                    gameScore++;
+                    document.getElementById('gameScore').textContent = gameScore;
+                }
+            };
+
+            window.startYarnWinder = function() {
+                if (!isGameRunning) {
+                    isGameRunning = true;
+                    gameTime = 10;
+                    gameScore = 0;
+                    document.getElementById('gameTimer').textContent = gameTime;
+                    document.getElementById('gameScore').textContent = gameScore;
+                    document.getElementById('yarnWinderBall').style.pointerEvents = 'auto';
+                    gameInterval = setInterval(() => {
+                        gameTime--;
+                        document.getElementById('gameTimer').textContent = gameTime;
+                        if (gameTime <= 0) {
+                            clearInterval(gameInterval);
+                            isGameRunning = false;
+                            document.getElementById('yarnWinderBall').style.pointerEvents = 'none';
+                            updateHighScore();
+                        }
+                    }, 1000);
+                }
+            };
+
+            window.resetYarnWinder = function() {
+                clearInterval(gameInterval);
+                isGameRunning = false;
+                gameTime = 10;
+                gameScore = 0;
+                document.getElementById('gameTimer').textContent = gameTime;
+                document.getElementById('gameScore').textContent = gameScore;
+                document.getElementById('yarnWinderBall').style.pointerEvents = 'none';
+            };
+
+            function updateHighScore() {
+                const highScore = localStorage.getItem('yarnWinderHighScore') || 0;
+                if (gameScore > highScore) {
+                    localStorage.setItem('yarnWinderHighScore', gameScore);
+                    document.getElementById('highScore').textContent = gameScore;
+                }
+            }
+
+            document.getElementById('yarnWinderModal').addEventListener('show.bs.modal', function() {
+                document.getElementById('highScore').textContent = localStorage.getItem('yarnWinderHighScore') || 0;
+                resetYarnWinder();
+            });
+
+            // Stitch Match Game Logic
+            const stitches = [
+                { name: 'Single Crochet', icon: 'fas fa-link' },
+                { name: 'Double Crochet', icon: 'fas fa-arrows-alt-v' },
+                { name: 'Slip Stitch', icon: 'fas fa-minus' },
+                { name: 'Half Double', icon: 'fas fa-equals' },
+                { name: 'Treble Crochet', icon: 'fas fa-arrows-alt' },
+                { name: 'Chain Stitch', icon: 'fas fa-circle' },
+                { name: 'Puff Stitch', icon: 'fas fa-cloud' },
+                { name: 'Shell Stitch', icon: 'fas fa-fan' }
+            ];
+
+            let flippedCards = [];
+            let matchedPairs = 0;
+            let moves = 0;
+            let isProcessing = false;
+
+            window.startStitchMatch = function() {
+                const board = document.getElementById('stitchMatchBoard');
+                board.innerHTML = '';
+                flippedCards = [];
+                matchedPairs = 0;
+                moves = 0;
+                isProcessing = false;
+                document.getElementById('moveCounter').textContent = moves;
+                document.getElementById('bestScore').textContent = localStorage.getItem('stitchMatchBestScore') || '0';
+
+                const shuffledStitches = [...stitches, ...stitches].sort(() => Math.random() - 0.5);
+                shuffledStitches.forEach((stitch, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('stitch-card');
+                    card.dataset.stitch = stitch.name;
+                    card.innerHTML = `
+                        <div class="card-front" style="display: none;">
+                            <i class="${stitch.icon}" style="font-size: 1.5rem;"></i>
+                            <p style="margin: 5px 0 0; font-family: 'Patrick Hand';">${stitch.name}</p>
+                        </div>
+                        <div class="card-back">
+                            <i class="fas fa-yarn" style="font-size: 1.5rem;"></i>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => flipCard(card));
+                    board.appendChild(card);
+                });
+
+                board.style.display = 'grid';
+                board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                board.style.gap = '10px';
+            };
+
+            function flipCard(card) {
+                if (isProcessing || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+                card.classList.add('flipped');
+                card.querySelector('.card-front').style.display = 'block';
+                card.querySelector('.card-back').style.display = 'none';
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    moves++;
+                    document.getElementById('moveCounter').textContent = moves;
+                    isProcessing = true;
+                    checkMatch();
+                }
+            }
+
+            function checkMatch() {
+                const [card1, card2] = flippedCards;
+                if (card1.dataset.stitch === card2.dataset.stitch) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    matchedPairs++;
+                    flippedCards = [];
+                    isProcessing = false;
+                    if (matchedPairs === stitches.length) {
+                        updateBestScore();
+                    }
+                } else {
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        card1.querySelector('.card-front').style.display = 'none';
+                        card1.querySelector('.card-back').style.display = 'block';
+                        card2.querySelector('.card-front').style.display = 'none';
+                        card2.querySelector('.card-back').style.display = 'block';
+                        flippedCards = [];
+                        isProcessing = false;
+                    }, 1000);
+                }
+            }
+
+            function updateBestScore() {
+                const bestScore = localStorage.getItem('stitchMatchBestScore') || Infinity;
+                if (moves < bestScore) {
+                    localStorage.setItem('stitchMatchBestScore', moves);
+                    document.getElementById('bestScore').textContent = moves;
+                }
+            }
+
+            document.getElementById('stitchMatchModal').addEventListener('show.bs.modal', function() {
+                startStitchMatch();
+            });
+
+            // Initialize yarn ball position
+            loadYarnBallPosition();
+            window.addEventListener('resize', updateMenuPosition);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced dropdown hover effect for desktop
+            const dropdownTriggers = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdownTriggers.forEach(trigger => {
+                // Add yarn icon animation
+                const yarnIcon = document.createElement('span');
+                yarnIcon.innerHTML = '🧶';
+                yarnIcon.style.position = 'absolute';
+                yarnIcon.style.right = '10px';
+                yarnIcon.style.opacity = '0';
+                yarnIcon.style.transition = 'all 0.3s ease';
+                trigger.parentNode.appendChild(yarnIcon);
+                
+                trigger.addEventListener('mouseenter', () => {
+                    yarnIcon.style.opacity = '1';
+                    yarnIcon.style.transform = 'translateY(-2px) rotate(10deg)';
+                });
+                
+                trigger.addEventListener('mouseleave', () => {
+                    yarnIcon.style.opacity = '0';
+                    yarnIcon.style.transform = 'translateY(0) rotate(0)';
+                });
+                
+                // Touch device support
+                trigger.addEventListener('touchend', (e) => {
+                    if (window.innerWidth < 992) { // Mobile devices only
+                        e.preventDefault();
+                        const dropdown = new bootstrap.Dropdown(trigger);
+                        dropdown.toggle();
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.matches('.dropdown-toggle') && !e.target.closest('.dropdown-menu')) {
+                    const openDropdowns = document.querySelectorAll('.dropdown-menu.show');
+                    openDropdowns.forEach(dropdown => {
+                        dropdown.classList.remove('show');
+                        const trigger = document.querySelector(`[aria-expanded="true"][aria-labelledby="${dropdown.id}"]`);
+                        if (trigger) {
+                            trigger.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }
+            });
+            
+            // Add crochet-themed animation to dropdown items
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0,10 Q5,5 10,10 T20,10\' stroke=\'%23FF9AA2\' fill=\'none\' stroke-width=\'1\'/%3E%3C/svg%3E")';
+                    item.style.backgroundRepeat = 'no-repeat';
+                    item.style.backgroundPosition = '0 center';
+                    item.style.paddingLeft = '30px';
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    item.style.backgroundImage = 'none';
+                    item.style.paddingLeft = '20px';
+                });
+            });
+        });
+
+        // Optional: Pause animation when user interacts with banner
+        document.addEventListener('DOMContentLoaded', function() {
+            const marquee = document.querySelector('.marquee-content');
+            const items = document.querySelectorAll('.marquee-item');
+            
+            // Make items focusable for keyboard users
+            items.forEach(item => {
+                item.setAttribute('tabindex', '0');
+            });
+            
+            // Pause on focus for accessibility
+            marquee.addEventListener('focusin', function() {
+                this.style.animationPlayState = 'paused';
+            });
+            
+            marquee.addEventListener('focusout', function() {
+                this.style.animationPlayState = 'running';
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

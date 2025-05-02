@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Product | CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5 stitch-pattern">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-3 animate__animated animate__fadeIn" style="background-color: var(--card-bg); box-shadow: var(--shadow);">
+                <div class="card-header border-0 rounded-top-3 py-4" style="background: linear-gradient(90deg, var(--primary-color), var(--accent-color));">
+                    <h4 class="mb-0 text-white crosho-heading d-flex align-items-center">
+                        <i class="fas fa-yarn me-2"></i> Edit Crochet Creation
+                    </h4>
+                </div>
+                <div class="card-body p-5">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Error Messages -->
+                        {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show animate__animated animate__fadeIn rounded-lg" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Current Product Image -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Current Creation Image</label>
+                            <div class="text-center">
+                                {% if product.image %}
+                                    <div class="position-relative d-inline-block">
+                                        {% if product.image.url %}
+                                            <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                                 class="img-fluid rounded-3 mb-3 transition-transform"
+                                                 style="max-height: 400px; width: auto; border: 4px solid var(--secondary-color); 
+                                                        box-shadow: var(--shadow); 
+                                                        background: url('{% static 'images/yarn-border.png' %}') repeat; 
+                                                        background-size: 50px; padding: 8px;"
+                                                 alt="Current crochet creation">
+                                        {% else %}
+                                            <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                                 class="img-fluid rounded-3 mb-3 transition-transform"
+                                                 style="max-height: 400px; width: auto; border: 4px solid var(--secondary-color); 
+                                                        box-shadow: var(--shadow); 
+                                                        background: url('{% static 'images/yarn-border.png' %}') repeat; 
+                                                        background-size: 50px; padding: 8px;"
+                                                 alt="Current crochet creation">
+                                        {% endif %}
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 rounded-3 bg-dark bg-opacity-0 hover-bg-opacity-10 transition-all"></div>
+                                    </div>
+                                {% else %}
+                                    <div class="bg-pink-50 p-5 text-center rounded-3 border border-dashed border-pink-300" style="background-color: var(--secondary-color);">
+                                        <i class="fas fa-yarn fa-4x text-pink-400 mb-3" style="color: var(--accent-color);"></i>
+                                        <p class="mb-0" style="font-family: 'Caveat', cursive; color: var(--text-color);">No image stitched yet</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- New Image Upload -->
+                        <div class="mb-4">
+                            <label for="image" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Stitch a New Image (Optional)</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control rounded-start-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500" id="image" name="image" accept="image/*" style="border-color: var(--border-color); background-color: var(--card-bg);">
+                                <label class="input-group-text rounded-end-3 bg-pink-100 text-pink-600" for="image" style="background-color: var(--secondary-color); color: var(--accent-color);">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                            </div>
+                            <div class="form-text" style="color: var(--light-text);">
+                                Max 5MB. JPG, PNG, or GIF. Leave blank to keep current image.
+                            </div>
+                        </div>
+                        
+                        <!-- Product Name -->
+                        <div class="mb-4">
+                            <label for="name" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Creation Name *</label>
+                            <input type="text" class="form-control {% if messages and 'name' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                   id="name" name="name" value="{{ product.proname }}" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">
+                            <div class="invalid-feedback">
+                                Please name your crochet creation.
+                            </div>
+                        </div>
+                        
+                        <!-- Price and Currency -->
+                        <div class="row mb-4">
+                            <div class="col-md-8 mb-3 mb-md-0">
+                                <label for="price" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Price *</label>
+                                <input type="number" class="form-control {% if messages and 'price' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                       id="price" name="price" step="0.01" min="0" value="{{ product.price }}" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">
+                                <div class="invalid-feedback">
+                                    Please set a valid price greater than 0.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="currency" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Currency *</label>
+                                <select class="form-select {% if messages and 'currency' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                        id="currency" name="currency" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">
+                                    <option value="USD" {% if product.currency == 'USD' %}selected{% endif %}>USD ($)</option>
+                                    <option value="INR" {% if product.currency == 'INR' %}selected{% endif %}>INR (₹)</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a currency.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Category and Stitch Type -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="category" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Category *</label>
+                                <select class="form-select {% if messages and 'category' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                        id="category" name="category" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">
+                                    <option value="">Select category...</option>
+                                    <option value="amigurumi" {% if product.category == 'amigurumi' %}selected{% endif %}>Amigurumi</option>
+                                    <option value="clothing" {% if product.category == 'clothing' %}selected{% endif %}>Clothing</option>
+                                    <option value="accessories" {% if product.category == 'accessories' %}selected{% endif %}>Accessories</option>
+                                    <option value="home_decor" {% if product.category == 'home_decor' %}selected{% endif %}>Home Decor</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a category.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="stitch_type" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Stitch Type *</label>
+                                <select class="form-select {% if messages and 'stitch_type' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                        id="stitch_type" name="stitch_type" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">
+                                    <option value="">Select stitch type...</option>
+                                    <option value="granny" {% if product.stitch_type == 'granny' %}selected{% endif %}>Granny Square</option>
+                                    <option value="amigurumi" {% if product.stitch_type == 'amigurumi' %}selected{% endif %}>Amigurumi</option>
+                                    <option value="lace" {% if product.stitch_type == 'lace' %}selected{% endif %}>Lace</option>
+                                    <option value="cable" {% if product.stitch_type == 'cable' %}selected{% endif %}>Cable</option>
+                                    <option value="tunisian" {% if product.stitch_type == 'tunisian' %}selected{% endif %}>Tunisian</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a stitch type.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-bold text-gray-800" style="font-family: 'Caveat', cursive;">Description *</label>
+                            <textarea class="form-control {% if messages and 'description' in errors %}is-invalid{% endif %} rounded-3 bg-white border-pink-300 focus:border-pink-500 focus:ring-pink-500 transition-all" 
+                                      id="description" name="description" rows="5" required style="border-color: var(--border-color); background-color: var(--card-bg); font-family: 'Caveat', cursive;">{{ product.prodescription }}</textarea>
+                            <div class="invalid-feedback">
+                                Please describe your crochet creation.
+                            </div>
+                            <div class="form-text" style="color: var(--light-text);">
+                                Share the story of your crochet piece, including materials, dimensions, and care instructions.
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex flex-column flex-md-row gap-3">
+                            <button type="submit" class="btn btn-crosho btn-lg flex-grow-1 rounded-3 transition-all">
+                                <i class="fas fa-save me-2"></i> Save Creation
+                            </button>
+                            <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-crosho btn-lg flex-grow-1 rounded-3 transition-all">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+<style>
+.transition-all {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(255, 182, 193, 0.25);
+}
+.crosho-heading::after {
+    background-color: var(--accent-color);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('image');
+    imageInput.addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || 'Choose file...';
+        console.log('Image selected:', fileName);
+    });
+
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        console.log('Form submission attempted');
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log('Form validation failed');
+        } else {
+            console.log('Form validation passed, submitting...');
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

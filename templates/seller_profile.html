@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ user_info.username }}'s Profile - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if user_info.profile_picture %}
+                    <img src="/media/{{ user_info.profile_picture }}"
+     class="rounded-circle img-thumbnail mb-2"
+     alt="Profile Picture"
+     style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+
+               
+                    {% else %}
+                        <img src="{% static 'images/image.jpg' %}" 
+                             class="rounded-circle img-fluid mb-3" 
+                             alt="Default Profile"
+                             style="width: 200px; height: 200px; object-fit: cover;">
+                    {% endif %}
+                    
+                    <h3 class="mb-1">
+                        {% if user_info.first_name or user_info.last_name %}
+                            {{ user_info.first_name }} {{ user_info.last_name }}
+                        {% else %}
+                            {{ user_info.username }}
+                        {% endif %}
+                    </h3>
+                    <p class="text-muted mb-3">@{{ user_info.username }}</p>
+                    
+                    <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm mb-3">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </a>
+                </div>
+                
+                <div class="card-footer bg-white">
+                    <h5 class="card-title">About</h5>
+                    <p class="card-text">
+                        {% if user_info.bio %}
+                            {{ user_info.bio|linebreaksbr }}
+                        {% else %}
+                            <span class="text-muted">No bio provided</span>
+                        {% endif %}
+                    </p>
+                    
+                    <div class="contact-info mt-3">
+                        {% if user_info.address %}
+                            <p class="mb-2">
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i> 
+                                <span>{{ user_info.address }}</span>
+                            </p>
+                        {% endif %}
+                        
+                        {% if user_info.phone_number %}
+                            <p class="mb-2">
+                                <i class="fas fa-phone text-muted me-2"></i> 
+                                <span>{{ user_info.phone_number }}</span>
+                            </p>
+                        {% endif %}
+                        
+                        {% if user_info.email %}
+                            <p class="mb-0">
+                                <i class="fas fa-envelope text-muted me-2"></i> 
+                                <span>{{ user_info.email }}</span>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- Products Section -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">My Products</h4>
+                    <div>
+                        <a href="{% url 'seller_dashboard' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add Product
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="text-center py-5">
+                    <h4 class="text-muted mb-3">Keep your crochet magic going! 🧶</h4>
+                    <p class="text-muted mb-2">You’ve crafted beautiful items — keep updating and sharing them to attract more buyers.</p>
+                    
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-md-4 mb-2">
+                            <div class="p-3 border rounded bg-light">
+                                <h6 class="text-secondary">✨ Tip</h6>
+                                <p class="mb-0 small">Use seasonal themes or colors to catch attention — buyers love festive crochet!</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <div class="p-3 border rounded bg-light">
+                                <h6 class="text-secondary">📸 Boost</h6>
+                                <p class="mb-0 small">Great photos sell better — use natural light and simple backgrounds.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to All Products
+                    </a>
+                </div>
+                
+            
+            <!-- Reviews Section -->
+            <div class="card shadow-sm">
+    <div class="text-center py-5">
+        <h4 class="text-muted mb-4">
+            No matching products right now — but here’s what’s trending in the crochet world!
+        </h4>
+
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-primary"><i class="fas fa-palette me-1"></i> Trending Yarn Colors</h6>
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            <li><span class="badge bg-light text-dark">Sage Green</span></li>
+                            <li><span class="badge bg-light text-dark">Dusty Rose</span></li>
+                            <li><span class="badge bg-light text-dark">Cream Beige</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-primary"><i class="fas fa-star me-1"></i> Hot Stitch Trends</h6>
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            <li>🌿 Granny Square Bags</li>
+                            <li>🧣 Chunky Scarves</li>
+                            <li>🪻 Floral Appliqué Tops</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="text-primary"><i class="fas fa-chart-line me-1"></i> Popular Searches</h6>
+                        <ul class="list-unstyled small mt-2 mb-0">
+                            <li>✨ Boho Wall Hangings</li>
+                            <li>🧸 Amigurumi Kits</li>
+                            <li>🎁 Giftable Baby Sets</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-primary mt-4">
+            <i class="fas fa-arrow-left me-1"></i> Back to All Products
+        </a>
+    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+    
+    .product-image {
+        height: 180px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    
+    .contact-info p {
+        margin-bottom: 0.5rem;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    @media (max-width: 767.98px) {
+        .product-image {
+            height: 150px;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="role-selection-container">
+    <div class="container py-5">
+        <!-- Animated Header -->
+        <div class="text-center mb-5">
+            <div class="d-flex justify-content-center align-items-center mb-3">
+                <img src="{% static 'images/yarn-ball.jpg' %}" alt="Crochet Hook" class="me-3" style="height: 50px;">
+                <h1 class="display-4 fw-bold text-primary m-0">Join CroSho</h1>
+                <img src="{% static 'images/yarn-ball.jpg' %}" alt="Yarn Ball" class="ms-3" style="height: 50px;">
+            </div>
+            <p class="lead">Choose your path in our crochet community</p>
+            <div class="divider mx-auto">
+                <span class="stitch"></span>
+                <span class="stitch"></span>
+                <span class="stitch"></span>
+            </div>
+        </div>
+
+        <!-- Role Cards -->
+        <div class="row g-4 justify-content-center">
+            <!-- Buyer Card -->
+            <div class="col-lg-5 col-md-6">
+                <form method="post" action="{% url 'role_selection' %}" class="h-100">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" value="buyer">
+                    <div class="card role-card h-100 border-0 shadow-lg hover-effect buyer-card">
+                        <div class="card-body text-center p-4 p-lg-5">
+                            <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 mb-4 mx-auto">
+                                <i class="bi bi-bag-heart-fill text-primary fs-1"></i>
+                            </div>
+                            <h2 class="h1 fw-bold mb-3">I'm a Buyer</h2>
+                            <p class="mb-4">Looking for unique handmade crochet items to cherish or gift to loved ones.</p>
+                            <ul class="text-start mb-4 ps-0">
+                                <li class="d-flex mb-2">
+                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                                    <span>Discover one-of-a-kind crochet creations</span>
+                                </li>
+                                <li class="d-flex mb-2">
+                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                                    <span>Support independent artisans</span>
+                                </li>
+                                <li class="d-flex">
+                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                                    <span>Request custom pieces</span>
+                                </li>
+                            </ul>
+                            <button type="submit" class="btn btn-primary btn-lg px-4 fw-bold mt-auto">
+                                Continue as Buyer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Divider (visible on larger screens) -->
+            <div class="col-lg-1 d-none d-lg-flex align-items-center justify-content-center">
+                <div class="vr h-75 mx-auto"></div>
+                <span class="position-absolute bg-white px-2 text-muted">OR</span>
+            </div>
+
+            <!-- Seller Card -->
+            <div class="col-lg-5 col-md-6">
+                <form method="post" action="{% url 'role_selection' %}" class="h-100">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" value="seller">
+                    <div class="card role-card h-100 border-0 shadow-lg hover-effect seller-card">
+                        <div class="card-body text-center p-4 p-lg-5">
+                            <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle p-3 mb-4 mx-auto">
+                                <i class="bi bi-people-fill text-success fs-1"></i>
+                            </div>
+                            <h2 class="h1 fw-bold mb-3">I'm a Seller</h2>
+                            <p class="mb-4">An artisan looking to showcase and sell my crochet creations.</p>
+                            <ul class="text-start mb-4 ps-0">
+                                <li class="d-flex mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Reach customers worldwide</span>
+                                </li>
+                                <li class="d-flex mb-2">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Manage your crochet business</span>
+                                </li>
+                                <li class="d-flex">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Join our artisan community</span>
+                                </li>
+                            </ul>
+                            <button type="submit" class="btn btn-success btn-lg px-4 fw-bold mt-auto">
+                                Continue as Seller
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Existing User Prompt -->
+        <div class="text-center mt-5">
+            <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="fw-bold">Sign In</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-selection-container {
+        background-color: rgba(var(--bs-primary-rgb), 0.03);
+        min-height: calc(100vh - 120px);
+    }
+
+    .divider {
+        position: relative;
+        height: 2px;
+        width: 100px;
+        background-color: var(--bs-primary);
+        margin: 1.5rem 0;
+    }
+
+    .stitch {
+        position: absolute;
+        top: -3px;
+        width: 6px;
+        height: 8px;
+        background-color: white;
+        border: 1px solid var(--bs-primary);
+    }
+
+    .stitch:nth-child(1) {
+        left: 15%;
+    }
+
+    .stitch:nth-child(2) {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .stitch:nth-child(3) {
+        right: 15%;
+    }
+
+    .role-card {
+        transition: all 0.3s ease;
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+    .buyer-card:hover {
+        border-color: var(--bs-primary);
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    .seller-card:hover {
+        border-color: var(--bs-success);
+        transform: translateY(-5px) scale(1.02);
+    }
+
+    .hover-effect {
+        transition: all 0.3s ease;
+    }
+
+    .hover-effect:hover {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .role-selection-container {
+        background-color: rgba(30, 30, 46, 0.7);
+    }
+
+    [data-bs-theme="dark"] .role-card {
+        background-color: #16213e;
+    }
+
+    [data-bs-theme="dark"] .stitch {
+        background-color: #16213e;
+    }
+</style>
+{% endblock %}

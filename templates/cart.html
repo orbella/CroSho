@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - CroSho{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Your Shopping Cart</h2>
+                </div>
+                
+                <div class="card-body">
+                    {% if cart_items %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 100px;">Product</th>
+                                    <th>Details</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                <tr>
+                                    <td>
+                                        <img src="{{ MEDIA_URL }}{{ product.image }}" 
+                                             alt="{{ item.product.proname }}" 
+                                             class="img-fluid rounded border">
+                                    </td>
+                                    <td>
+                                        <h5 class="h6 mb-1">{{ item.product.proname }}</h5>
+                                        <p class="small text-muted mb-0">
+                                            {{ item.product.category|title }}
+                                            {% if item.product.stitch_type %}
+                                            • {{ item.product.stitch_type|title }}
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                    <td>
+                                        {% if item.product.currency == 'USD' %}
+                                            ${{ item.product.price|floatformat:2 }}
+                                        {% else %}
+                                            ₹{{ item.product.price|floatformat:2 }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary minus-btn" 
+                                                    type="button" 
+                                                    data-item-id="{{ item.id }}">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" 
+                                                   class="form-control text-center quantity-input" 
+                                                   value="{{ item.quantity }}" 
+                                                   min="1"
+                                                   data-item-id="{{ item.id }}">
+                                            <button class="btn btn-outline-secondary plus-btn" 
+                                                    type="button" 
+                                                    data-item-id="{{ item.id }}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if item.product.currency == 'USD' %}
+                                            ${{ item.total_price|floatformat:2 }}
+                                        {% else %}
+                                            ₹{{ item.total_price|floatformat:2 }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-outline-danger btn-sm remove-btn" 
+                                                data-item-id="{{ item.id }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="mb-2">Your cart is empty</h5>
+                        <p class="text-muted mb-4">Browse our collection to add items</p>
+                        <a href="{% url 'shop' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if cart_items %}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Continue Shopping
+                </a>
+                <button class="btn btn-danger" id="clear-cart-btn">
+                    <i class="fas fa-trash-alt me-2"></i> Clear Cart
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if cart_items %}
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Order Summary</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <strong>
+                            {% if cart_items.0.product.currency == 'USD' %}
+                                ${{ cart_subtotal|floatformat:2 }}
+                            {% else %}
+                                ₹{{ cart_subtotal|floatformat:2 }}
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <strong>
+                            {% if cart_items.0.product.currency == 'USD' %}
+                                $5.00
+                            {% else %}
+                                ₹50.00
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total:</span>
+                        <strong class="h5">
+                            {% if cart_items.0.product.currency == 'USD' %}
+                                ${{ cart_total|floatformat:2 }}
+                            {% else %}
+                                ₹{{ cart_total|floatformat:2 }}
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100 py-2">
+                        <i class="fas fa-credit-card me-2"></i> Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Consistent with seller dashboard */
+    .card {
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .table th {
+        font-weight: 500;
+        color: #6c757d;
+    }
+    
+    .quantity-input {
+        -moz-appearance: textfield;
+    }
+    
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    .input-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .sticky-top {
+        z-index: 1;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 767.98px) {
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .table td, .table th {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantity adjustment
+    document.querySelectorAll('.plus-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+            input.value = parseInt(input.value) + 1;
+            updateCartItem(itemId, input.value);
+        });
+    });
+    
+    document.querySelectorAll('.minus-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateCartItem(itemId, input.value);
+            }
+        });
+    });
+    
+    // Quantity input change
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.getAttribute('data-item-id');
+            if (parseInt(this.value) < 1) this.value = 1;
+            updateCartItem(itemId, this.value);
+        });
+    });
+    
+    // Remove item
+    document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemId = this.getAttribute('data-item-id');
+            removeCartItem(itemId);
+        });
+    });
+    
+    // Clear cart
+    document.getElementById('clear-cart-btn')?.addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear your cart?')) {
+            clearCart();
+        }
+    });
+    
+    // Cart update functions
+    function updateCartItem(itemId, quantity) {
+        fetch(`/cart/update/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                quantity: quantity
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+    
+    function removeCartItem(itemId) {
+        fetch(`/cart/remove/${itemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+    
+    function clearCart() {
+        fetch('/cart/clear/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

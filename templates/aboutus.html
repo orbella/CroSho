@@ -1,0 +1,544 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Our Story in Every Stitch</h1>
+                <p class="lead mb-4">Where passion for crochet meets the joy of handmade treasures</p>
+                <a href="{% url 'shop' %}" class="btn btn-primary btn-lg px-4">Explore Our Collection</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/group.jpg' %}" class="img-fluid rounded-4 shadow-lg" alt="Crochet artisans at work" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4 h-100">
+                    <div class="icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-4">
+                        <i class="bi bi-heart-fill fs-3"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Handmade with Love</h3>
+                    <p class="mb-0">Every item in our marketplace is crafted with care by skilled artisans who pour their heart into each stitch.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 h-100">
+                    <div class="icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-4">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Artisan Empowerment</h3>
+                    <p class="mb-0">We connect talented makers with appreciative buyers, creating sustainable livelihoods for crochet artists worldwide.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 h-100">
+                    <div class="icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-4">
+                        <i class="bi bi-globe fs-3"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Eco-Conscious</h3>
+                    <p class="mb-0">Promoting sustainable crafts that celebrate slow fashion and environmentally friendly materials.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Timeline Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Our Journey</h2>
+            <div class="stitch-divider mx-auto"></div>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-year">2018</div>
+                    <h3 class="h4">The First Stitch</h3>
+                    <p>Founded by crochet enthusiast Shobha Jadhav as a small blog sharing free patterns and connecting local makers.</p>
+                </div>
+                <div class="timeline-image">
+                    <img src="{% static 'images/shobha.jpg' %}" class="rounded-3" alt="Founder with yarn" loading="lazy">
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-year">2020</div>
+                    <h3 class="h4">Growing Community</h3>
+                    <p>Launched our first online marketplace with 25 artisans. Featured in "Handmade Crafts" magazine.</p>
+                </div>
+                <div class="timeline-image">
+                    <img src="{% static 'images/community-event.jpg' %}" class="rounded-3" alt="Community event" loading="lazy">
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-year">2022</div>
+                    <h3 class="h4">Global Reach</h3>
+                    <p>Expanded to include artisans from 15 countries. Won "Best Craft Platform" at the Creative Awards.</p>
+                </div>
+                <div class="timeline-image">
+                    <img src="{% static 'images/global.jpg' %}" class="rounded-3" alt="Global team" loading="lazy">
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="timeline-year">Today</div>
+                    <h3 class="h4">500+ Artisans</h3>
+                    <p>A thriving community of crochet artists and enthusiasts celebrating handmade craftsmanship daily.</p>
+                </div>
+                <div class="timeline-image">
+                    <img src="{% static 'images/team.jpg' %}" class="rounded-3" alt="Current team" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Meet the Makers</h2>
+            <p class="lead">Behind every beautiful creation is a talented artist</p>
+            <div class="stitch-divider mx-auto"></div>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            <!-- Team Member 1 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center p-4 h-100">
+                    <div class="team-img-container mx-auto mb-3 position-relative">
+                        <img src="{% static 'images/girl2.jpg' %}" 
+                             class="rounded-circle object-fit-cover" 
+                             width="150" 
+                             height="150" 
+                             alt="Artisan Maria" 
+                             loading="lazy"
+                             style="object-position: top center;">
+                        <div class="yarn-badge position-absolute">🧶 12 yrs</div>
+                    </div>
+                    <h3 class="h5 mb-1">Maria Gonzalez</h3>
+                    <p class="small text-muted mb-2">Amigurumi Specialist</p>
+                    <p class="small mb-0">"Crochet brings joy to both maker and recipient - that's why I love what I do!"</p>
+                </div>
+            </div>
+            
+            <!-- Team Member 2 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center p-4 h-100">
+                    <div class="team-img-container mx-auto mb-3 position-relative">
+                        <img src="{% static 'images/james.jpg' %}" 
+                             class="rounded-circle object-fit-cover" 
+                             width="150" 
+                             height="150" 
+                             alt="Artisan James" 
+                             loading="lazy"
+                             style="object-position: center;">
+                        <div class="yarn-badge position-absolute">🧶 8 yrs</div>
+                    </div>
+                    <h3 class="h5 mb-1">James Wilson</h3>
+                    <p class="small text-muted mb-2">Modern Crochet Designer</p>
+                    <p class="small mb-0">"Breaking stereotypes one stitch at a time - crochet isn't just grandma's craft!"</p>
+                </div>
+            </div>
+            
+            <!-- Team Member 3 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center p-4 h-100">
+                    <div class="team-img-container mx-auto mb-3 position-relative">
+                        <img src="{% static 'images/girl3.jpg' %}" 
+                             class="rounded-circle object-fit-cover" 
+                             width="150" 
+                             height="150" 
+                             alt="Artisan Aisha" 
+                             loading="lazy"
+                             style="object-position: top center;">
+                        <div class="yarn-badge position-absolute">🧶 15 yrs</div>
+                    </div>
+                    <h3 class="h5 mb-1">Arbella Victor</h3>
+                    <p class="small text-muted mb-2">Traditional Stitch Expert</p>
+                    <p class="small mb-0">"Preserving heritage techniques while adapting them for modern lifestyles."</p>
+                </div>
+            </div>
+            
+            <!-- Team Member 4 -->
+            <div class="col-lg-3 col-md-6">
+                <div class="team-card text-center p-4 h-100">
+                    <div class="team-img-container mx-auto mb-3 position-relative">
+                        <img src="{% static 'images/girl1.jpg' %}" 
+                             class="rounded-circle object-fit-cover" 
+                             width="150" 
+                             height="150" 
+                             alt="Artisan Sofia" 
+                             loading="lazy"
+                             style="object-position: top center;">
+                        <div class="yarn-badge position-absolute">🧶 5 yrs</div>
+                    </div>
+                    <h3 class="h5 mb-1">Sofia Chen</h3>
+                    <p class="small text-muted mb-2">Sustainable Yarn Advocate</p>
+                    <p class="small mb-0">"Creating beautiful things shouldn't cost the earth - eco-friendly yarns only!"</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-primary px-4 py-2">Join Our Artisans</a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Stories of Joy</h2>
+            <p class="lead">What our community says</p>
+            <div class="stitch-divider mx-auto"></div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Testimonial 1 -->
+            <div class="col-md-4">
+                <div class="testimonial-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/cus2.jpg' %}" 
+                                 class="rounded-circle object-fit-cover" 
+                                 width="80" 
+                                 height="80" 
+                                 alt="Emma Johnson" 
+                                 loading="lazy"
+                                 style="object-position: top;">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="h6 mb-1">Emma Johnson</h4>
+                            <div class="text-warning small mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <p class="text-muted small mb-0">New Parent</p>
+                        </div>
+                    </div>
+                    <blockquote class="mb-0 mt-auto">
+                        <i class="bi bi-quote text-primary opacity-25 fs-1"></i>
+                        <p class="ps-4">The baby blanket I ordered was even more beautiful in person. Knowing it was handmade with such care made it extra special for my newborn.</p>
+                    </blockquote>
+                </div>
+            </div>
+            
+            <!-- Testimonial 2 -->
+            <div class="col-md-4">
+                <div class="testimonial-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/cus3.jpg' %}" 
+                                 class="rounded-circle object-fit-cover" 
+                                 width="80" 
+                                 height="80" 
+                                 alt="Michael Brown" 
+                                 loading="lazy"
+                                 style="object-position: center;">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="h6 mb-1">Michael Brown</h4>
+                            <div class="text-warning small mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </div>
+                            <p class="text-muted small mb-0">Fiber Artist</p>
+                        </div>
+                    </div>
+                    <blockquote class="mb-0 mt-auto">
+                        <i class="bi bi-quote text-primary opacity-25 fs-1"></i>
+                        <p class="ps-4">As a crochet artist myself, I appreciate the fair pricing and exposure this platform gives to makers. It's changed my business completely.</p>
+                    </blockquote>
+                </div>
+            </div>
+            
+            <!-- Testimonial 3 -->
+            <div class="col-md-4">
+                <div class="testimonial-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="flex-shrink-0">
+                            <img src="{% static 'images/cus1.jpg' %}" 
+                                 class="rounded-circle object-fit-cover" 
+                                 width="80" 
+                                 height="80" 
+                                 alt="Sarah Williams" 
+                                 loading="lazy"
+                                 style="object-position: top;">
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="h6 mb-1">Sarah Williams</h4>
+                            <div class="text-warning small mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <p class="text-muted small mb-0">Pet Lover</p>
+                        </div>
+                    </div>
+                    <blockquote class="mb-0 mt-auto">
+                        <i class="bi bi-quote text-primary opacity-25 fs-1"></i>
+                        <p class="ps-4">The custom crochet portrait of my dog was worth every penny! The attention to detail was incredible - she captured his personality perfectly.</p>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Newsletter -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="display-6 fw-bold mb-3">Stay in the Loop</h2>
+                <p class="lead mb-4">Subscribe for new patterns, artisan stories, and exclusive offers</p>
+                <form method="post" action="{% url 'newsletter_subscribe' %}" class="row g-2 justify-content-center">
+                    {% csrf_token %}
+                    <div class="col-md-8">
+                        <input type="email" name="email" class="form-control form-control-lg" placeholder="Your email address" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-light btn-lg w-100 fw-bold">Subscribe</button>
+                    </div>
+                </form>
+                <p class="small mt-3 mb-0 opacity-75">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-img-container {
+        width: 150px;
+        height: 150px;
+        position: relative;
+    }
+    
+    .yarn-badge {
+        background: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        font-size: 1.2rem;
+    }
+    
+    .team-card {
+        background: white;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stitch-divider {
+        width: 80px;
+        height: 3px;
+        background-color: #6f42c1;
+        position: relative;
+    }
+    
+    .stitch-divider:after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(90deg, white 25%, transparent 25%, transparent 50%, white 50%, white 75%, transparent 75%);
+        background-size: 8px 2px;
+        top: 0;
+        left: 0;
+    }
+
+    /* Hero Section */
+    .about-hero {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+    
+    /* Icon Circles */
+    .icon-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Stitch Divider */
+    .stitch-divider {
+        width: 100px;
+        height: 3px;
+        background-color: var(--bs-primary);
+        position: relative;
+    }
+    .stitch-divider:before,
+    .stitch-divider:after {
+        content: '';
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border: 2px solid var(--bs-primary);
+        top: -3px;
+    }
+    .stitch-divider:before {
+        left: 25%;
+    }
+    .stitch-divider:after {
+        right: 25%;
+    }
+    
+    /* Timeline */
+    .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .timeline:before {
+        content: '';
+        position: absolute;
+        width: 3px;
+        background-color: var(--bs-primary);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .timeline-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 50px;
+        position: relative;
+    }
+    .timeline-content {
+        width: 45%;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .timeline-image {
+        width: 45%;
+    }
+    .timeline-image img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .timeline-year {
+        font-weight: bold;
+        color: var(--bs-primary);
+        margin-bottom: 10px;
+    }
+    .timeline-item:nth-child(even) {
+        flex-direction: row-reverse;
+    }
+    
+    /* Team Cards */
+    .team-card {
+        background: white;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .team-img {
+        width: 120px;
+        height: 120px;
+        position: relative;
+    }
+    .yarn-badge {
+        position: absolute;
+        bottom: -10px;
+        right: -10px;
+        background: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        font-size: 1.2rem;
+    }
+    
+    /* Testimonials */
+    .testimonial-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    /* Dark Mode */
+    [data-bs-theme="dark"] .about-hero {
+        background-color: rgba(30, 30, 46, 0.7);
+    }
+    [data-bs-theme="dark"] .timeline-content,
+    [data-bs-theme="dark"] .team-card,
+    [data-bs-theme="dark"] .testimonial-card {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+    }
+    [data-bs-theme="dark"] .stitch-divider:before,
+    [data-bs-theme="dark"] .stitch-divider:after {
+        background: #1e1e1e;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .timeline:before {
+            left: 30px;
+        }
+        .timeline-item {
+            flex-direction: column !important;
+            margin-bottom: 30px;
+        }
+        .timeline-content,
+        .timeline-image {
+            width: 100%;
+        }
+        .timeline-content {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+{% endblock %}

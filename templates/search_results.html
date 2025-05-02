@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}Search Results - CroSho{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4" style="font-family: 'Croissant One', serif; color: var(--text-color);">Search Results for "{{ query }}"</h2>
+
+    <!-- Debug Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 floral-card">
+                <div class="card-body">
+                    <h3 class="text-center mb-4" style="font-family: 'Croissant One', serif; color: var(--text-color);">Debug Information</h3>
+                    <p><strong>Query:</strong> {{ query|default:"No query provided" }}</p>
+                    <p><strong>Results Count:</strong> {{ products|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if products %}
+        <div class="row g-4">
+            {% for product in products %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-lg border-0 floral-card h-100">
+                        {% if product.image %}
+                            <img src="/media/{{ product.image }}" class="card-img-top" alt="{{ product.name }}" style="max-width: 100%; max-height: 300px; object-fit: contain; border-top-left-radius: 15px; border-top-right-radius: 15px;" onerror="this.onerror=null; this.src='{% static 'images/placeholder.jpg' %}';">
+                        {% else %}
+                            <div class="card-img-top text-center bg-light" style="height: 200px; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                                <p class="pt-5 text-muted">No image available</p>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: #F7C9CC; font-family: 'Croissant One', serif;">{{ product.name|default:"Unnamed Product" }}</h5>
+                            <p class="card-text text-muted">{{ product.description|truncatewords:20|default:"No description available" }}</p>
+                            <p class="card-text"><strong>Price:</strong> 
+                                {% if product.currency == 'USD' %}
+                                    ${{ product.price|floatformat:2 }}
+                                {% else %}
+                                    ₹{{ product.price|floatformat:2 }}
+                                {% endif %}
+                            </p>
+                            <p class="card-text text-muted small">Category: {{ product.category|default:"N/A" }}</p>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'product_detail' product_id=product.id %}" class="btn btn-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&page={{ products.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > products.number|add:-3 and num < products.number|add:3 %}
+                            <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&page={{ products.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="col-12 text-center">
+            {% if query %}
+                <p class="lead text-muted">No products found for "{{ query }}". Try a different search term.</p>
+            {% else %}
+                <p class="lead text-muted">Please enter a search term to find products.</p>
+            {% endif %}
+            <a href="{% url 'shop' %}" class="btn btn-primary mt-3">Browse All Products</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .floral-card {
+        background-color: var(--bg-color);
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .floral-card::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: url('https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?auto=format&fit=crop&w=100&q=80') repeat;
+        opacity: 0.2;
+        z-index: -1;
+    }
+
+    .floral-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-top {
+        width: 100%;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        font-weight: 600;
+        transition: transform 0.3s ease;
+        border-radius: 10px;
+    }
+
+    .btn-primary:hover {
+        transform: scale(1.05);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-text {
+        font-size: 0.95rem;
+    }
+
+    .page-link {
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        border-color: var(--accent-color);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: var(--dropdown-text);
+    }
+
+    @media (max-width: 768px) {
+        .floral-card {
+            padding: 0.75rem;
+        }
+        .card-title {
+            font-size: 1.2rem;
+        }
+        .card-img-top {
+            max-height: 180px;
+        }
+        .btn-primary {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .card-img-top {
+            max-height: 150px;
+        }
+        .card-title {
+            font-size: 1.1rem;
+        }
+        .d-flex.gap-2 {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .btn-sm {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.querySelectorAll('.btn-primary').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.style.animation = 'yarnPulse 0.5s ease';
+        });
+    });
+</script>
+{% endblock %}

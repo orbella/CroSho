@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Order Confirmation - CroSho{% endblock %}
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4" style="font-family: 'Croissant One', serif; color: var(--text-color);">Order Confirmed!</h2>
+    <div class="card shadow-lg border-0 floral-card">
+        <div class="card-body text-center">
+            <p class="lead">Thank you for your purchase! Your order (ID: {{ order_id }}) has been placed successfully.</p>
+            <p>You will receive a confirmation email soon.</p>
+            <a href="{% url 'shop' %}" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+<style>
+    .floral-card {
+        background-color: var(--bg-color);
+        border-radius: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+    .floral-card::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: url('https://images.unsplash.com/photo-1617019114583-affb34d1b3cd?auto=format&fit=crop&w=100&q=80') repeat;
+        opacity: 0.2;
+        z-index: -1;
+    }
+    .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
